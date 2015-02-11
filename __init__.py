@@ -1,17 +1,27 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-# All the code that follow is
-# Copyright (c) 2015, Experian Consumer Services. All Rights Reserved.
-# Not for reuse without permission.
+# Copyright 2015 Richard Huang <rickypc@users.noreply.github.com>
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
 
-#import os
+import os
 import Selenium2Library
 #from ExtendedSelenium2Library.locators import ExtendedElementFinder
 
-#current_dir = os.path.dirname(os.path.abspath(__file__))
-#execfile(os.path.join(current_dir, 'version.py'))
-#__version__ = VERSION
+current_dir = os.path.dirname(os.path.abspath(__file__))
+execfile(os.path.join(current_dir, 'version.py'))
+__version__ = VERSION
 
 
 class ExtendedSelenium2Library(Selenium2Library.Selenium2Library):
