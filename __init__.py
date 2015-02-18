@@ -42,31 +42,110 @@ class ExtendedSelenium2Library(Selenium2Library.Selenium2Library):
         #self._element_finder = ExtendedElementFinder()
 
     def click_button(self, locator):
+        """Clicks a button identified by `locator`.
+
+        Key attributes for buttons are `id`, `name` and `value`. See
+        `introduction` for details about locating elements.
+        """
         super(ExtendedSelenium2Library, self).click_button(locator)
         self.wait_until_angular_ready()
 
     def click_element(self, locator):
+        """Click element identified by `locator`.
+
+        Key attributes for arbitrary elements are `id` and `name`. See
+        `introduction` for details about locating elements.
+        """
         super(ExtendedSelenium2Library, self).click_element(locator)
         self.wait_until_angular_ready()
 
     def click_element_at_coordinates(self, locator, xoffset, yoffset):
+        """Click element identified by `locator` at x/y coordinates of the element.
+        Cursor is moved and the center of the element and x/y coordinates are
+        calculted from that point.
+
+        Key attributes for arbitrary elements are `id` and `name`. See
+        `introduction` for details about locating elements.
+        """
         super(ExtendedSelenium2Library, self).click_element_at_coordinates(locator, xoffset, yoffset)
         self.wait_until_angular_ready()
 
     def click_image(self, locator):
+        """Clicks an image found by `locator`.
+
+        Key attributes for images are `id`, `src` and `alt`. See
+        `introduction` for details about locating elements.
+        """
         super(ExtendedSelenium2Library, self).click_image(locator)
         self.wait_until_angular_ready()
 
     def click_link(self, locator):
+        """Clicks a link identified by locator.
+
+        Key attributes for links are `id`, `name`, `href` and link text. See
+        `introduction` for details about locating elements.
+        """
         super(ExtendedSelenium2Library, self).click_link(locator)
         self.wait_until_angular_ready()
 
     def double_click_element(self, locator):
+        """Double click element identified by `locator`.
+
+        Key attributes for arbitrary elements are `id` and `name`. See
+        `introduction` for details about locating elements.
+        """
         super(ExtendedSelenium2Library, self).double_click_element(locator)
         self.wait_until_angular_ready()
 
     def open_browser(self, url, browser='firefox', alias=None,remote_url=False,
                      desired_capabilities=None,ff_profile_dir=None):
+        """Opens a new browser instance to given URL.
+
+        Returns the index of this browser instance which can be used later to
+        switch back to it. Index starts from 1 and is reset back to it when
+        `Close All Browsers` keyword is used. See `Switch Browser` for
+        example.
+
+        Optional alias is an alias for the browser instance and it can be used
+        for switching between browsers (just as index can be used). See `Switch
+        Browser` for more details.
+
+        Possible values for `browser` are as follows:
+
+        | firefox          | FireFox   |
+        | ff               | FireFox   |
+        | internetexplorer | Internet Explorer |
+        | ie               | Internet Explorer |
+        | googlechrome     | Google Chrome |
+        | gc               | Google Chrome |
+        | chrome           | Google Chrome |
+        | opera            | Opera         |
+        | phantomjs        | PhantomJS     |
+        | htmlunit         | HTMLUnit      |
+        | htmlunitwithjs   | HTMLUnit with Javascipt support |
+        | android          | Android       |
+        | iphone           | Iphone        |
+        | safari           | Safari        |
+
+
+        Note, that you will encounter strange behavior, if you open
+        multiple Internet Explorer browser instances. That is also why
+        `Switch Browser` only works with one IE browser at most.
+        For more information see:
+        http://selenium-grid.seleniumhq.org/faq.html#i_get_some_strange_errors_when_i_run_multiple_internet_explorer_instances_on_the_same_machine
+
+        Optional 'remote_url' is the url for a remote selenium server for example
+        http://127.0.0.1/wd/hub.  If you specify a value for remote you can
+        also specify 'desired_capabilities' which is a string in the form
+        key1:val1,key2:val2 that will be used to specify desired_capabilities
+        to the remote server. This is useful for doing things like specify a
+        proxy server for internet explorer or for specify browser and os if your
+        using saucelabs.com. 'desired_capabilities' can also be a dictonary
+        (created with 'Create Dictionary') to allow for more complex configurations.
+
+        Optional 'ff_profile_dir' is the path to the firefox profile dir if you
+        wish to overwrite the default.
+        """
         index = super(ExtendedSelenium2Library, self).open_browser(url, browser,
                                                                    alias, remote_url,
                                                                    desired_capabilities,
@@ -75,10 +154,21 @@ class ExtendedSelenium2Library(Selenium2Library.Selenium2Library):
         return index
 
     def select_all_from_list(self, locator):
+        """Selects all values from multi-select list identified by `id`.
+
+        Key attributes for lists are `id` and `name`. See `introduction` for
+        details about locating elements.
+        """
         super(ExtendedSelenium2Library, self).select_all_from_list(locator)
         self._angular_element_trigger_change(locator)
 
     def select_checkbox(self, locator):
+        """Selects checkbox identified by `locator`.
+
+        Does nothing if checkbox is already selected. Key attributes for
+        checkboxes are `id` and `name`. See `introduction` for details about
+        locating elements.
+        """
         self._info("Selecting checkbox '%s'." % locator)
         element = self._get_checkbox(locator)
 
@@ -89,22 +179,72 @@ class ExtendedSelenium2Library(Selenium2Library.Selenium2Library):
                 element.click()
 
     def select_from_list(self, locator, *items):
+        """Selects `*items` from list identified by `locator`
+
+        If more than one value is given for a single-selection list, the last
+        value will be selected. If the target list is a multi-selection list,
+        and `*items` is an empty list, all values of the list will be selected.
+
+        *items try to select by value then by label.
+
+        It's faster to use 'by index/value/label' functions.
+
+        An exception is raised for a single-selection list if the last
+        value does not exist in the list and a warning for all other non-
+        existing items. For a multi-selection list, an exception is raised
+        for any and all non-existing values.
+
+        Select list keywords work on both lists and combo boxes. Key attributes for
+        select lists are `id` and `name`. See `introduction` for details about
+        locating elements.
+        """
         super(ExtendedSelenium2Library, self).select_from_list(locator, *items)
         self._angular_element_trigger_change(locator)
 
     def select_from_list_by_index(self, locator, *indexes):
+        """Selects `*indexes` from list identified by `locator`
+
+        Select list keywords work on both lists and combo boxes. Key attributes for
+        select lists are `id` and `name`. See `introduction` for details about
+        locating elements.
+        """
         super(ExtendedSelenium2Library, self).select_from_list_by_index(locator, *indexes)
         self._angular_element_trigger_change(locator)
 
     def select_from_list_by_label(self, locator, *labels):
+        """Selects `*labels` from list identified by `locator`
+
+        Select list keywords work on both lists and combo boxes. Key attributes for
+        select lists are `id` and `name`. See `introduction` for details about
+        locating elements.
+        """
         super(ExtendedSelenium2Library, self).select_from_list_by_label(locator, *labels)
         self._angular_element_trigger_change(locator)
 
     def select_from_list_by_value(self, locator, *values):
+        """Selects `*values` from list identified by `locator`
+
+        Select list keywords work on both lists and combo boxes. Key attributes for
+        select lists are `id` and `name`. See `introduction` for details about
+        locating elements.
+        """
         super(ExtendedSelenium2Library, self).select_from_list_by_value(locator, *values)
         self._angular_element_trigger_change(locator)
 
     def select_radio_button(self, group_name, value):
+        """Sets selection of radio button group identified by `group_name` to `value`.
+
+        The radio button to be selected is located by two arguments:
+        - `group_name` is used as the name of the radio input
+        - `value` is used for the value attribute or for the id attribute
+
+        The XPath used to locate the correct radio button then looks like this:
+        //input[@type='radio' and @name='group_name' and (@value='value' or @id='value')]
+
+        Examples:
+        | Select Radio Button | size | XL | # Matches HTML like <input type="radio" name="size" value="XL">XL</input> |
+        | Select Radio Button | size | sizeXL | # Matches HTML like <input type="radio" name="size" value="XL" id="sizeXL">XL</input> |
+        """
         self._info("Selecting '%s' from radio button '%s'." % (value, group_name))
         element = self._get_radio_button_with_value(group_name, value)
 
@@ -115,10 +255,27 @@ class ExtendedSelenium2Library(Selenium2Library.Selenium2Library):
                 element.click()
 
     def submit_form(self, locator):
+        """Submits a form identified by `locator`.
+
+        If `locator` is empty, first form in the page will be submitted.
+        Key attributes for forms are `id` and `name`. See `introduction` for
+        details about locating elements.
+        """
         super(ExtendedSelenium2Library, self).submit_form(locator)
         self.wait_until_angular_ready()
 
     def wait_until_angular_ready(self, timeout=None, error=None):
+        """Waits until AngularJS is ready to process next request or `timeout` expires.
+
+        `error` can be used to override the default error message.
+
+        See `introduction` for more information about `timeout` and its
+        default value.
+
+        See also `Wait For Condition`, `Wait Until Page Contains`,
+        `Wait Until Page Contains Element`, `Wait Until Element Is Visible`
+        and BuiltIn keyword `Wait Until Keyword Succeeds`.
+        """
         if self._is_angular_page():
             if not timeout:
                 timeout = self._timeout_in_secs
