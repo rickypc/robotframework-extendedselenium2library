@@ -18,6 +18,8 @@
 import os
 import Selenium2Library
 #from ExtendedSelenium2Library.locators import ExtendedElementFinder
+from selenium.common.exceptions import WebDriverException
+from time import sleep
 
 current_dir = os.path.dirname(os.path.abspath(__file__))
 execfile(os.path.join(current_dir, 'version.py'))
@@ -29,7 +31,7 @@ class ExtendedSelenium2Library(Selenium2Library.Selenium2Library):
     Robot Framework's test library.
     """
 
-    NG_READY = '__RFNGREADY'
+    #NG_READY = '__RFNGREADY'
     NG_WRAPPER = '%(prefix)s' \
                  'angular.element(document.querySelector(\'[data-ng-app]\')||document).injector().' \
                  'get(\'$browser\').notifyWhenNoOutstandingRequests(%(handler)s)'
@@ -283,12 +285,15 @@ class ExtendedSelenium2Library(Selenium2Library.Selenium2Library):
             if not error:
                 error = 'AngularJS is not ready in %ss.' % timeout
 
-            js = self.NG_WRAPPER % {'prefix': 'document.%s=false;' % self.NG_READY,
-                                    'handler': 'function(){document.%s=true}' % self.NG_READY}
+            js = self.NG_WRAPPER % {'prefix': 'var cb=arguments[arguments.length-1];',
+                                    'handler': 'function(){cb(true)}'}
 
-            self._debug("Executing JavaScript:\n%s" % js)
-            self._current_browser().execute_script(js)
-            self.wait_for_condition('return document.%s' % self.NG_READY, timeout, error)
+            try:
+                self._wait_until(timeout, error, self._current_browser().execute_async_script, js)
+            except WebDriverException:
+                # page is unloading, we'll try again
+                sleep(0.250)
+                self._wait_until(timeout, error, self._current_browser().execute_async_script, js)
 
     def _angular_element_trigger_change(self, locator):
         element = self._element_find(locator, True, True)
