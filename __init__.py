@@ -295,6 +295,29 @@ class ExtendedSelenium2Library(Selenium2Library.Selenium2Library):
                 sleep(0.250)
                 self._wait_until(timeout, error, self._current_browser().execute_async_script, js)
 
+    def wait_until_element_is_not_visible(self, locator, timeout=None, error=None):
+        """Waits until element specified with `locator` is not visible.
+
+        Fails if `timeout` expires before the element is not visible. See
+        `introduction` for more information about `timeout` and its
+        default value.
+
+        `error` can be used to override the default error message.
+
+        See also `Wait Until Element Is Not Visible`, `Wait Until Page Contains`,
+        `Wait Until Page Contains Element`, `Wait For Condition` and
+        BuiltIn keyword `Wait Until Keyword Succeeds`.
+        """
+        def check_invisibility():
+            invisible = not self._is_visible(locator)
+            if invisible:
+                return
+            elif invisible is None:
+                return error or "Element locator '%s' did not match any elements after %s" % (locator, self._format_timeout(timeout))
+            else:
+                return error or "Element '%s' was visible in %s" % (locator, self._format_timeout(timeout))
+        self._wait_until_no_error(timeout, check_invisibility)
+
     def _angular_element_trigger_change(self, locator):
         element = self._element_find(locator, True, True)
 
