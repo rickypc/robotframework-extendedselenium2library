@@ -31,7 +31,6 @@ class ExtendedSelenium2Library(Selenium2Library.Selenium2Library):
     Robot Framework's test library.
     """
 
-    #NG_READY = '__RFNGREADY'
     NG_WRAPPER = '%(prefix)s' \
                  'angular.element(document.querySelector(\'[data-ng-app]\')||document).injector().' \
                  'get(\'$browser\').notifyWhenNoOutstandingRequests(%(handler)s)'
