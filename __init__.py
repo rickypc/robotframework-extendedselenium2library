@@ -15,15 +15,13 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import os
 import Selenium2Library
 #from ExtendedSelenium2Library.locators import ExtendedElementFinder
+from ExtendedSelenium2Library.version import get_version
 from selenium.common.exceptions import WebDriverException
 from time import sleep
 
-current_dir = os.path.dirname(os.path.abspath(__file__))
-execfile(os.path.join(current_dir, 'version.py'))
-__version__ = VERSION
+__version__ = get_version()
 
 
 class ExtendedSelenium2Library(Selenium2Library.Selenium2Library):
