@@ -16,10 +16,10 @@
 # limitations under the License.
 
 import Selenium2Library
+import time
 #from ExtendedSelenium2Library.locators import ExtendedElementFinder
 from ExtendedSelenium2Library.version import get_version
-from selenium.common.exceptions import WebDriverException
-from time import sleep
+from robot import utils
 
 __version__ = get_version()
 
@@ -275,9 +275,11 @@ class ExtendedSelenium2Library(Selenium2Library.Selenium2Library):
         `Wait Until Page Contains Element`, `Wait Until Element Is Visible`
         and BuiltIn keyword `Wait Until Keyword Succeeds`.
         """
+
         if self._is_angular_page():
-            if not timeout:
-                timeout = self._timeout_in_secs
+            is_ready = False
+            timeout = utils.timestr_to_secs(timeout) if timeout is not None else self._timeout_in_secs
+            max_time = time.time() + timeout
 
             if not error:
                 error = 'AngularJS is not ready in %ss.' % timeout
@@ -285,12 +287,20 @@ class ExtendedSelenium2Library(Selenium2Library.Selenium2Library):
             js = self.NG_WRAPPER % {'prefix': 'var cb=arguments[arguments.length-1];',
                                     'handler': 'function(){cb(true)}'}
 
-            try:
-                self._wait_until(timeout, error, self._current_browser().execute_async_script, js)
-            except WebDriverException:
-                # page is unloading, we'll try again
-                sleep(0.250)
-                self._wait_until(timeout, error, self._current_browser().execute_async_script, js)
+            while True:
+                try:
+                    if self._current_browser().execute_async_script(js):
+                        is_ready = True
+                        break
+                except:
+                    # page is inflight, we'll try again
+                    if time.time() <= max_time:
+                        time.sleep(0.25)
+                    else:
+                        break
+
+            if not is_ready:
+                raise AssertionError(error)
 
     def wait_until_element_is_not_visible(self, locator, timeout=None, error=None):
         """Waits until element specified with `locator` is not visible.
