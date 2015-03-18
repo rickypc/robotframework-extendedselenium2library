@@ -32,7 +32,6 @@ class ExtendedSelenium2Library(Selenium2Library.Selenium2Library):
     NG_WRAPPER = '%(prefix)s' \
                  'angular.element(document.querySelector(\'[data-ng-app]\')||document).injector().' \
                  'get(\'$browser\').notifyWhenNoOutstandingRequests(%(handler)s)'
-
     ROBOT_EXIT_ON_FAILURE = True
     ROBOT_LIBRARY_SCOPE = 'TEST SUITE'
 
@@ -170,7 +169,6 @@ class ExtendedSelenium2Library(Selenium2Library.Selenium2Library):
         """
         self._info("Selecting checkbox '%s'." % locator)
         element = self._get_checkbox(locator)
-
         if self._is_angular_control(element):
             self._angular_select_checkbox_or_radio_button(element)
         else:
@@ -246,7 +244,6 @@ class ExtendedSelenium2Library(Selenium2Library.Selenium2Library):
         """
         self._info("Selecting '%s' from radio button '%s'." % (value, group_name))
         element = self._get_radio_button_with_value(group_name, value)
-
         if self._is_angular_control(element):
             self._angular_select_checkbox_or_radio_button(element)
         else:
@@ -275,18 +272,14 @@ class ExtendedSelenium2Library(Selenium2Library.Selenium2Library):
         `Wait Until Page Contains Element`, `Wait Until Element Is Visible`
         and BuiltIn keyword `Wait Until Keyword Succeeds`.
         """
-
         if self._is_angular_page():
             is_ready = False
             timeout = utils.timestr_to_secs(timeout) if timeout is not None else self._timeout_in_secs
             max_time = time.time() + timeout
-
             if not error:
                 error = 'AngularJS is not ready in %ss.' % timeout
-
             js = self.NG_WRAPPER % {'prefix': 'var cb=arguments[arguments.length-1];',
                                     'handler': 'function(){cb(true)}'}
-
             while True:
                 try:
                     if self._current_browser().execute_async_script(js):
@@ -298,7 +291,6 @@ class ExtendedSelenium2Library(Selenium2Library.Selenium2Library):
                         time.sleep(0.25)
                     else:
                         break
-
             if not is_ready:
                 raise AssertionError(error)
 
@@ -327,15 +319,12 @@ class ExtendedSelenium2Library(Selenium2Library.Selenium2Library):
 
     def _angular_element_trigger_change(self, locator):
         element = self._element_find(locator, True, True)
-
         if element is None:
             raise ValueError("Element '%s' not found." % locator)
-
         if self._is_angular_control(element):
             # you will operating in different scope
             js = self.NG_WRAPPER % {'prefix': 'var obj=arguments[0];',
                                     'handler': 'function(){angular.element(obj).triggerHandler(\'change\')}'}
-
             self._debug("Executing JavaScript:\n%s" % js)
             self._current_browser().execute_script(js, element)
             self.wait_until_angular_ready()
@@ -343,13 +332,11 @@ class ExtendedSelenium2Library(Selenium2Library.Selenium2Library):
     def _angular_select_checkbox_or_radio_button(self, element):
         if element is None:
             raise ValueError("Element not found.")
-
         if self._is_angular_control(element):
             # you will operating in different scope
             js = self.NG_WRAPPER % {'prefix': 'var obj=arguments[0];',
                                     'handler': 'function(){angular.element(obj).prop(\'checked\',true).'
                                     'triggerHandler(\'click\')}'}
-
             self._debug("Executing JavaScript:\n%s" % js)
             self._current_browser().execute_script(js, element)
             self.wait_until_angular_ready()
