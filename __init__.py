@@ -269,10 +269,10 @@ class ExtendedSelenium2Library(Selenium2Library.Selenium2Library):
         """
         self._info("Selecting checkbox '%s'." % locator)
         element = self._get_checkbox(locator)
-        if self._is_angular_control(element):
-            self._angular_select_checkbox_or_radio_button(element)
-        else:
-            if not element.is_selected():
+        if not element.is_selected():
+            if self._is_angular_control(element):
+                self._angular_select_checkbox_or_radio_button(element)
+            else:
                 element.click()
 
     def select_from_list(self, locator, *items):
@@ -344,10 +344,10 @@ class ExtendedSelenium2Library(Selenium2Library.Selenium2Library):
         """
         self._info("Selecting '%s' from radio button '%s'." % (value, group_name))
         element = self._get_radio_button_with_value(group_name, value)
-        if self._is_angular_control(element):
-            self._angular_select_checkbox_or_radio_button(element)
-        else:
-            if not element.is_selected():
+        if not element.is_selected():
+            if self._is_angular_control(element):
+                self._angular_select_checkbox_or_radio_button(element)
+            else:
                 element.click()
 
     def submit_form(self, locator):
