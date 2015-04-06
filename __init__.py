@@ -447,6 +447,6 @@ class ExtendedSelenium2Library(Selenium2Library.Selenium2Library):
         return element.get_attribute('ng-model') != '' or element.get_attribute('data-ng-model') != ''
 
     def _is_angular_page(self):
-        js = 'return !!(window.angular && window.angular.version)'
+        js = 'return !!window.angular'
         self._debug("Executing JavaScript:\n%s" % js)
         return self._current_browser().execute_script(js)
