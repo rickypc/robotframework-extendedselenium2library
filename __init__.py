@@ -443,8 +443,11 @@ class ExtendedSelenium2Library(Selenium2Library.Selenium2Library):
             self.wait_until_angular_ready()
 
     def _is_angular_control(self, element):
-        self._debug('Validating Angular control: %s' % element.get_attribute('outerHTML'))
-        return element.get_attribute('ng-model') != '' or element.get_attribute('data-ng-model') != ''
+        if self._is_angular_page():
+            self._debug('Validating Angular control: %s' % element.get_attribute('outerHTML'))
+            return element.get_attribute('ng-model') != '' or element.get_attribute('data-ng-model') != ''
+        else:
+            return False
 
     def _is_angular_page(self):
         js = 'return !!window.angular'
