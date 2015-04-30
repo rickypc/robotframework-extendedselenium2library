@@ -16,10 +16,10 @@
 # limitations under the License.
 
 import Selenium2Library
-import time
 #from ExtendedSelenium2Library.locators import ExtendedElementFinder
 from ExtendedSelenium2Library.version import get_version
 from robot import utils
+from time import sleep, time
 
 __version__ = get_version()
 
@@ -68,6 +68,7 @@ class ExtendedSelenium2Library(Selenium2Library.Selenium2Library):
     | sizzle       | Click Element `|` sizzle=div.my_class           | Matches by jQuery/sizzle selector                  |
     | tag          | Click Element `|` tag=div                       | Matches by HTML tag name                           |
     | default*     | Click Link    `|` default=page?a=b              | Matches key attributes with value after first '='  |
+
     * Explicitly specifying the default strategy is only necessary if locating
     elements by matching key attributes is desired and an attribute value
     contains a '='. The following would fail because it appears as if _page?a_
@@ -108,7 +109,8 @@ class ExtendedSelenium2Library(Selenium2Library.Selenium2Library):
     ROBOT_EXIT_ON_FAILURE = True
     ROBOT_LIBRARY_SCOPE = 'TEST SUITE'
 
-    def __init__(self, timeout=5.0, implicit_wait=0.0, run_on_failure='Capture Page Screenshot'):
+    def __init__(self, timeout=5.0, implicit_wait=0.0, run_on_failure='Capture Page Screenshot',
+                 block_until_page_ready=False, browser_breath_delay=0.05):
         """ExtendedSelenium2Library can be imported with optional arguments.
 
         `timeout` is the default timeout used to wait for all waiting actions.
@@ -137,6 +139,8 @@ class ExtendedSelenium2Library(Selenium2Library.Selenium2Library):
         | Library `|` ExtendedSelenium2Library `|` timeout=10      `|` run_on_failure=Nothing    | # Sets default timeout to 10 seconds and does nothing on failure           |
         """
         Selenium2Library.Selenium2Library.__init__(self, timeout, implicit_wait, run_on_failure)
+        self._block_until_page_ready = block_until_page_ready
+        self._browser_breath_delay = 0.05 if browser_breath_delay is None else float(browser_breath_delay)
         #self._element_finder = ExtendedElementFinder()
 
     def click_button(self, locator):
@@ -145,7 +149,9 @@ class ExtendedSelenium2Library(Selenium2Library.Selenium2Library):
         Key attributes for buttons are `id`, `name` and `value`. See
         `introduction` for details about locating elements.
         """
+        self._scroll_into_view(locator)
         super(ExtendedSelenium2Library, self).click_button(locator)
+        self._wait_until_page_ready()
         self.wait_until_angular_ready()
 
     def click_element(self, locator):
@@ -154,7 +160,9 @@ class ExtendedSelenium2Library(Selenium2Library.Selenium2Library):
         Key attributes for arbitrary elements are `id` and `name`. See
         `introduction` for details about locating elements.
         """
+        self._scroll_into_view(locator)
         super(ExtendedSelenium2Library, self).click_element(locator)
+        self._wait_until_page_ready()
         self.wait_until_angular_ready()
 
     def click_element_at_coordinates(self, locator, xoffset, yoffset):
@@ -165,7 +173,9 @@ class ExtendedSelenium2Library(Selenium2Library.Selenium2Library):
         Key attributes for arbitrary elements are `id` and `name`. See
         `introduction` for details about locating elements.
         """
+        self._scroll_into_view(locator)
         super(ExtendedSelenium2Library, self).click_element_at_coordinates(locator, xoffset, yoffset)
+        self._wait_until_page_ready()
         self.wait_until_angular_ready()
 
     def click_image(self, locator):
@@ -174,7 +184,9 @@ class ExtendedSelenium2Library(Selenium2Library.Selenium2Library):
         Key attributes for images are `id`, `src` and `alt`. See
         `introduction` for details about locating elements.
         """
+        self._scroll_into_view(locator)
         super(ExtendedSelenium2Library, self).click_image(locator)
+        self._wait_until_page_ready()
         self.wait_until_angular_ready()
 
     def click_link(self, locator):
@@ -183,7 +195,9 @@ class ExtendedSelenium2Library(Selenium2Library.Selenium2Library):
         Key attributes for links are `id`, `name`, `href` and link text. See
         `introduction` for details about locating elements.
         """
+        self._scroll_into_view(locator)
         super(ExtendedSelenium2Library, self).click_link(locator)
+        self._wait_until_page_ready()
         self.wait_until_angular_ready()
 
     def double_click_element(self, locator):
@@ -192,7 +206,9 @@ class ExtendedSelenium2Library(Selenium2Library.Selenium2Library):
         Key attributes for arbitrary elements are `id` and `name`. See
         `introduction` for details about locating elements.
         """
+        self._scroll_into_view(locator)
         super(ExtendedSelenium2Library, self).double_click_element(locator)
+        self._wait_until_page_ready()
         self.wait_until_angular_ready()
 
     def open_browser(self, url, browser='firefox', alias=None,remote_url=False,
@@ -210,21 +226,20 @@ class ExtendedSelenium2Library(Selenium2Library.Selenium2Library):
 
         Possible values for `browser` are as follows:
 
-        | firefox          | FireFox   |
-        | ff               | FireFox   |
-        | internetexplorer | Internet Explorer |
-        | ie               | Internet Explorer |
-        | googlechrome     | Google Chrome |
-        | gc               | Google Chrome |
-        | chrome           | Google Chrome |
-        | opera            | Opera         |
-        | phantomjs        | PhantomJS     |
-        | htmlunit         | HTMLUnit      |
+        | firefox          | FireFox                         |
+        | ff               | FireFox                         |
+        | internetexplorer | Internet Explorer               |
+        | ie               | Internet Explorer               |
+        | googlechrome     | Google Chrome                   |
+        | gc               | Google Chrome                   |
+        | chrome           | Google Chrome                   |
+        | opera            | Opera                           |
+        | phantomjs        | PhantomJS                       |
+        | htmlunit         | HTMLUnit                        |
         | htmlunitwithjs   | HTMLUnit with Javascipt support |
-        | android          | Android       |
-        | iphone           | Iphone        |
-        | safari           | Safari        |
-
+        | android          | Android                         |
+        | iphone           | Iphone                          |
+        | safari           | Safari                          |
 
         Note, that you will encounter strange behavior, if you open
         multiple Internet Explorer browser instances. That is also why
@@ -244,10 +259,9 @@ class ExtendedSelenium2Library(Selenium2Library.Selenium2Library):
         Optional 'ff_profile_dir' is the path to the firefox profile dir if you
         wish to overwrite the default.
         """
-        index = super(ExtendedSelenium2Library, self).open_browser(url, browser,
-                                                                   alias, remote_url,
-                                                                   desired_capabilities,
-                                                                   ff_profile_dir)
+        index = super(ExtendedSelenium2Library, self).open_browser(url, browser, alias, remote_url,
+                                                                   desired_capabilities, ff_profile_dir)
+        self._wait_until_page_ready()
         self.wait_until_angular_ready()
         return index
 
@@ -258,7 +272,7 @@ class ExtendedSelenium2Library(Selenium2Library.Selenium2Library):
         details about locating elements.
         """
         super(ExtendedSelenium2Library, self).select_all_from_list(locator)
-        self._angular_element_trigger_change(locator)
+        self._element_trigger_change(locator)
 
     def select_checkbox(self, locator):
         """Selects checkbox identified by `locator`.
@@ -270,10 +284,7 @@ class ExtendedSelenium2Library(Selenium2Library.Selenium2Library):
         self._info("Selecting checkbox '%s'." % locator)
         element = self._get_checkbox(locator)
         if not element.is_selected():
-            if self._is_angular_control(element):
-                self._angular_select_checkbox_or_radio_button(element)
-            else:
-                element.click()
+            self._select_checkbox_or_radio_button(element)
 
     def select_from_list(self, locator, *items):
         """Selects `*items` from list identified by `locator`
@@ -296,7 +307,7 @@ class ExtendedSelenium2Library(Selenium2Library.Selenium2Library):
         locating elements.
         """
         super(ExtendedSelenium2Library, self).select_from_list(locator, *items)
-        self._angular_element_trigger_change(locator)
+        self._element_trigger_change(locator)
 
     def select_from_list_by_index(self, locator, *indexes):
         """Selects `*indexes` from list identified by `locator`
@@ -306,7 +317,7 @@ class ExtendedSelenium2Library(Selenium2Library.Selenium2Library):
         locating elements.
         """
         super(ExtendedSelenium2Library, self).select_from_list_by_index(locator, *indexes)
-        self._angular_element_trigger_change(locator)
+        self._element_trigger_change(locator)
 
     def select_from_list_by_label(self, locator, *labels):
         """Selects `*labels` from list identified by `locator`
@@ -316,7 +327,7 @@ class ExtendedSelenium2Library(Selenium2Library.Selenium2Library):
         locating elements.
         """
         super(ExtendedSelenium2Library, self).select_from_list_by_label(locator, *labels)
-        self._angular_element_trigger_change(locator)
+        self._element_trigger_change(locator)
 
     def select_from_list_by_value(self, locator, *values):
         """Selects `*values` from list identified by `locator`
@@ -326,7 +337,7 @@ class ExtendedSelenium2Library(Selenium2Library.Selenium2Library):
         locating elements.
         """
         super(ExtendedSelenium2Library, self).select_from_list_by_value(locator, *values)
-        self._angular_element_trigger_change(locator)
+        self._element_trigger_change(locator)
 
     def select_radio_button(self, group_name, value):
         """Sets selection of radio button group identified by `group_name` to `value`.
@@ -345,10 +356,7 @@ class ExtendedSelenium2Library(Selenium2Library.Selenium2Library):
         self._info("Selecting '%s' from radio button '%s'." % (value, group_name))
         element = self._get_radio_button_with_value(group_name, value)
         if not element.is_selected():
-            if self._is_angular_control(element):
-                self._angular_select_checkbox_or_radio_button(element)
-            else:
-                element.click()
+            self._select_checkbox_or_radio_button(element)
 
     def submit_form(self, locator):
         """Submits a form identified by `locator`.
@@ -357,7 +365,9 @@ class ExtendedSelenium2Library(Selenium2Library.Selenium2Library):
         Key attributes for forms are `id` and `name`. See `introduction` for
         details about locating elements.
         """
+        self._scroll_into_view(locator)
         super(ExtendedSelenium2Library, self).submit_form(locator)
+        self._wait_until_page_ready()
         self.wait_until_angular_ready()
 
     def wait_until_angular_ready(self, timeout=None, error=None):
@@ -373,25 +383,23 @@ class ExtendedSelenium2Library(Selenium2Library.Selenium2Library):
         and BuiltIn keyword `Wait Until Keyword Succeeds`.
         """
         if self._is_angular_page():
-            is_ready = False
-            timeout = utils.timestr_to_secs(timeout) if timeout is not None else self._timeout_in_secs
-            max_time = time.time() + timeout
+            timeout = self._timeout_in_secs if timeout is None else utils.timestr_to_secs(timeout)
             if not error:
                 error = 'AngularJS is not ready in %ss.' % timeout
-            js = self.NG_WRAPPER % {'prefix': 'var cb=arguments[arguments.length-1];',
-                                    'handler': 'function(){cb(true)}'}
-            while True:
+
+            def predicate(process_response):
+                return process_response
+
+            def process():
+                js = self.NG_WRAPPER % {'prefix': 'var cb=arguments[arguments.length-1];',
+                                        'handler': 'function(){cb(true)}'}
                 try:
-                    if self._current_browser().execute_async_script(js):
-                        is_ready = True
-                        break
+                    return self._current_browser().execute_async_script(js)
                 except:
-                    # page is inflight, we'll try again
-                    if time.time() <= max_time:
-                        time.sleep(0.25)
-                    else:
-                        break
-            if not is_ready:
+                    return False
+
+            response = self._retry(process, predicate, timeout)
+            if not response['predicate']:
                 raise AssertionError(error)
 
     def wait_until_element_is_not_visible(self, locator, timeout=None, error=None):
@@ -418,29 +426,35 @@ class ExtendedSelenium2Library(Selenium2Library.Selenium2Library):
                 return error or "Element '%s' was visible in %s" % (locator, self._format_timeout(timeout))
         self._wait_until_no_error(timeout, check_invisibility)
 
-    def _angular_element_trigger_change(self, locator):
+    def _angular_select_checkbox_or_radio_button(self, element):
+        if element is None:
+            raise AssertionError("Element not found.")
+        # you will operating in different scope
+        js = self.NG_WRAPPER % {'prefix': 'var obj=arguments[0];',
+                                'handler': 'function(){angular.element(obj).prop(\'checked\',true).'
+                                'triggerHandler(\'click\')}'}
+        self._debug("Executing JavaScript:\n%s" % js)
+        self._current_browser().execute_script(js, element)
+        self._wait_until_page_ready()
+        self.wait_until_angular_ready()
+
+    def _element_trigger_change(self, locator):
         element = self._element_find(locator, True, True)
         if element is None:
-            raise ValueError("Element '%s' not found." % locator)
+            raise AssertionError("Element '%s' not found." % locator)
         if self._is_angular_control(element):
             # you will operating in different scope
             js = self.NG_WRAPPER % {'prefix': 'var obj=arguments[0];',
                                     'handler': 'function(){angular.element(obj).triggerHandler(\'change\')}'}
             self._debug("Executing JavaScript:\n%s" % js)
             self._current_browser().execute_script(js, element)
+            self._wait_until_page_ready()
             self.wait_until_angular_ready()
+        else:
+            self._wait_until_page_ready()
 
-    def _angular_select_checkbox_or_radio_button(self, element):
-        if element is None:
-            raise ValueError("Element not found.")
-        if self._is_angular_control(element):
-            # you will operating in different scope
-            js = self.NG_WRAPPER % {'prefix': 'var obj=arguments[0];',
-                                    'handler': 'function(){angular.element(obj).prop(\'checked\',true).'
-                                    'triggerHandler(\'click\')}'}
-            self._debug("Executing JavaScript:\n%s" % js)
-            self._current_browser().execute_script(js, element)
-            self.wait_until_angular_ready()
+    def _get_browser_name(self):
+        return self._current_browser().capabilities['browserName'].strip().lower()
 
     def _is_angular_control(self, element):
         if self._is_angular_page():
@@ -452,4 +466,90 @@ class ExtendedSelenium2Library(Selenium2Library.Selenium2Library):
     def _is_angular_page(self):
         js = 'return !!window.angular'
         self._debug("Executing JavaScript:\n%s" % js)
-        return self._current_browser().execute_script(js)
+        try:
+            return self._current_browser().execute_script(js)
+        except:
+            return False
+
+    # We could depend on ExponentialRetry module, but the folks in Selenium2Library might have less reception
+    # on the pull request, hence this helper method is here...
+    def _retry(self, process=None, predicate=None, timeout=None, delay=0.25):
+        """Retry requested `process`, until truthful `predicate` or reached `timeout`.
+
+        `process` is a function instance that will be run in each attempt
+        `predicate` is a function instance that will be run to validate the process function response
+        `timeout` is the default timeout used to wait for all waiting actions. It can be given as numbers considered seconds (e.g. 0.5 or 42)
+        `delay` is the default delay time between the wait, in seconds.
+
+        Returns a dict mapping keys to the corresponding response value. There are 3 keys available:
+
+        `attempt` is how many attempts made
+        `predicate` is the predicate function response
+        `process` is the process function response
+
+        Example:
+
+        {'attempt': 1,
+         'predicate': True,
+         'process': {status_code: 200}}
+        """
+        if not hasattr(process, '__call__'):
+            raise ValueError('process is not a function: %s' % process)
+        if not hasattr(predicate, '__call__'):
+            raise ValueError('predicate is not a function: %s' % predicate)
+        attempt = 0
+        predicate_response = False
+        process_response = None
+        timeout = self._timeout_in_secs if timeout is None else utils.timestr_to_secs(timeout)
+        max_time = time() + timeout
+        while True:
+            process_response = process()
+            predicate_response = predicate(process_response)
+            if predicate_response:
+                break
+            else:
+                if time() > max_time:
+                    break
+                else:
+                    sleep(delay)
+            attempt += 1
+        return {'attempt': attempt + 1, 'predicate': predicate_response, 'process': process_response}
+
+    def _scroll_into_view(self, locator):
+        browser_name = self._get_browser_name()
+        if browser_name == 'internetexplorer' or browser_name == 'ie':
+            element = self._element_find(locator, True, True)
+            if element is None:
+                raise AssertionError("Element '%s' not found." % locator)
+            js = 'arguments[0].scrollIntoView(true)'
+            self._debug("Executing JavaScript:\n%s" % js)
+            self._current_browser().execute_script(js, element)
+
+    def _select_checkbox_or_radio_button(self, element):
+        if self._is_angular_control(element):
+            self._angular_select_checkbox_or_radio_button(element)
+        else:
+            element.click()
+            self._wait_until_page_ready()
+
+    def _wait_until_page_ready(self, timeout=None, error=None):
+        if self._block_until_page_ready:
+            # let the browser take a deep breath...
+            sleep(self._browser_breath_delay)
+            timeout = self._timeout_in_secs if timeout is None else utils.timestr_to_secs(timeout)
+            if not error:
+                error = 'Document is not ready in %ss.' % timeout
+
+            def predicate(process_response):
+                return process_response
+
+            def process():
+                js = "return (document.readyState==='complete' && !!document.body && !!document.body.childNodes.length)"
+                try:
+                    return self._current_browser().execute_script(js)
+                except:
+                    return False
+
+            response = self._retry(process, predicate, timeout)
+            if not response['predicate']:
+                raise AssertionError(error)
