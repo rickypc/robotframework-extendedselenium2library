@@ -456,10 +456,45 @@ class ExtendedSelenium2Library(Selenium2Library.Selenium2Library):
     def _get_browser_name(self):
         return self._current_browser().capabilities['browserName'].strip().lower()
 
+    def _input_text_into_text_field(self, locator, text):
+        element = self._element_find(locator, True, True)
+        if self._is_angular_control(element):
+            # you will operating in different scope
+            js = self.NG_WRAPPER % {'prefix': 'var obj=arguments[0];var text=arguments[1];',
+                                    'handler': 'function(){var el=angular.element(obj).val(text);' +
+                                               'el.triggerHandler(\'change\');el.triggerHandler(\'blur\')}'}
+            self._debug("Executing JavaScript:\n%s" % js)
+            self._current_browser().execute_script(js, element, text)
+            self._wait_until_page_ready()
+            self.wait_until_angular_ready()
+        else:
+            # *** run these into separate contexts to reduce race condition ***
+            browser_name = self._get_browser_name()
+            event = '' if self._is_firefox(browser_name) else 'event'
+            # focus window first, before focus to the requested field
+            js = ("try{window.focus();$(arguments[0]).trigger('focus',[%(event)s])}" +
+                 "catch(x){arguments[0].focus(%(event)s)}") % {'event': event}
+            self._debug("Executing JavaScript:\n%s" % js)
+            self._current_browser().execute_script(js, element)
+            if self._is_internet_explorer(browser_name):
+                # let the browser take a deep breath...
+                sleep(self._browser_breath_delay)
+            js = ("try{$(arguments[0]).val(arguments[1]).trigger('keyup',[%(event)s])}" +
+                 "catch(x){arguments[0].value=arguments[1]}") % {'event': event}
+            self._debug("Executing JavaScript:\n%s" % js)
+            self._current_browser().execute_script(js, element, text)
+            if self._is_internet_explorer(browser_name):
+                # let the browser take a deep breath...
+                sleep(self._browser_breath_delay)
+            # blur the window, will blur the field :)
+            js = "try{window.blur()}catch(x){arguments[0].onblur()}"
+            self._debug("Executing JavaScript:\n%s" % js)
+            self._current_browser().execute_script(js, element)
+
     def _is_angular_control(self, element):
         if self._is_angular_page():
             self._debug('Validating Angular control: %s' % element.get_attribute('outerHTML'))
-            return element.get_attribute('ng-model') != '' or element.get_attribute('data-ng-model') != ''
+            return element.get_attribute('data-ng-model') != '' or element.get_attribute('ng-model') != ''
         else:
             return False
 
@@ -470,6 +505,16 @@ class ExtendedSelenium2Library(Selenium2Library.Selenium2Library):
             return self._current_browser().execute_script(js)
         except:
             return False
+
+    def _is_firefox(self, browser_name=None):
+        if not browser_name:
+            browser_name = self._get_browser_name()
+        return browser_name == 'firefox' or browser_name == 'ff'
+
+    def _is_internet_explorer(self, browser_name=None):
+        if not browser_name:
+            browser_name = self._get_browser_name()
+        return browser_name == 'internetexplorer' or browser_name == 'ie'
 
     # We could depend on ExponentialRetry module, but the folks in Selenium2Library might have less reception
     # on the pull request, hence this helper method is here...
@@ -516,8 +561,7 @@ class ExtendedSelenium2Library(Selenium2Library.Selenium2Library):
         return {'attempt': attempt + 1, 'predicate': predicate_response, 'process': process_response}
 
     def _scroll_into_view(self, locator):
-        browser_name = self._get_browser_name()
-        if browser_name == 'internetexplorer' or browser_name == 'ie':
+        if self._is_internet_explorer():
             element = self._element_find(locator, True, True)
             if element is None:
                 raise AssertionError("Element '%s' not found." % locator)
