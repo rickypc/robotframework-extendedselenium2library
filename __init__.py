@@ -425,26 +425,6 @@ class ExtendedSelenium2Library(Selenium2Library.Selenium2Library):
             self._wait_until(timeout, error, lambda: process(js) == True)
             self._current_browser().set_script_timeout(self._timeout_in_secs)
 
-        # if self._is_angular_page():
-        #     timeout = self._timeout_in_secs if timeout is None else utils.timestr_to_secs(timeout)
-        #     if not error:
-        #         error = 'AngularJS is not ready in %ss.' % timeout
-        #
-        #     def predicate(process_response):
-        #         return process_response
-        #
-        #     def process():
-        #         js = self.NG_WRAPPER % {'prefix': 'var cb=arguments[arguments.length-1];',
-        #                                 'handler': 'function(){cb(true)}'}
-        #         try:
-        #             return self._current_browser().execute_async_script(js)
-        #         except:
-        #             return False
-        #
-        #     response = self._retry(process, predicate, timeout)
-        #     if not response['predicate']:
-        #         raise AssertionError(error)
-
     def wait_until_element_is_not_visible(self, locator, timeout=None, error=None):
         """Waits until element specified with `locator` is not visible.
 
@@ -558,50 +538,6 @@ class ExtendedSelenium2Library(Selenium2Library.Selenium2Library):
             browser_name = self._get_browser_name()
         return browser_name == 'internetexplorer' or browser_name == 'ie'
 
-    # We could depend on ExponentialRetry module, but the folks in Selenium2Library might have less reception
-    # on the pull request, hence this helper method is here...
-    def _retry(self, process=None, predicate=None, timeout=None, delay=0.25):
-        """Retry requested `process`, until truthful `predicate` or reached `timeout`.
-
-        `process` is a function instance that will be run in each attempt
-        `predicate` is a function instance that will be run to validate the process function response
-        `timeout` is the default timeout used to wait for all waiting actions. It can be given as numbers considered seconds (e.g. 0.5 or 42)
-        `delay` is the default delay time between the wait, in seconds.
-
-        Returns a dict mapping keys to the corresponding response value. There are 3 keys available:
-
-        `attempt` is how many attempts made
-        `predicate` is the predicate function response
-        `process` is the process function response
-
-        Example:
-
-        {'attempt': 1,
-         'predicate': True,
-         'process': {status_code: 200}}
-        """
-        if not hasattr(process, '__call__'):
-            raise ValueError('process is not a function: %s' % process)
-        if not hasattr(predicate, '__call__'):
-            raise ValueError('predicate is not a function: %s' % predicate)
-        attempt = 0
-        predicate_response = False
-        process_response = None
-        timeout = self._timeout_in_secs if timeout is None else utils.timestr_to_secs(timeout)
-        max_time = time() + timeout
-        while True:
-            process_response = process()
-            predicate_response = predicate(process_response)
-            if predicate_response:
-                break
-            else:
-                if time() > max_time:
-                    break
-                else:
-                    sleep(delay)
-            attempt += 1
-        return {'attempt': attempt + 1, 'predicate': predicate_response, 'process': process_response}
-
     def _scroll_into_view(self, locator):
         if self._is_internet_explorer():
             element = self._element_find(locator, True, True)
@@ -635,24 +571,3 @@ class ExtendedSelenium2Library(Selenium2Library.Selenium2Library):
             self._current_browser().set_script_timeout(timeout)
             self._wait_until(timeout, error, lambda: process(js) == True)
             self._current_browser().set_script_timeout(self._timeout_in_secs)
-
-        # if self._block_until_page_ready:
-        #     # let the browser take a deep breath...
-        #     sleep(self._browser_breath_delay)
-        #     timeout = self._timeout_in_secs if timeout is None else utils.timestr_to_secs(timeout)
-        #     if not error:
-        #         error = 'Document is not ready in %ss.' % timeout
-        #
-        #     def predicate(process_response):
-        #         return process_response
-        #
-        #     def process():
-        #         js = "return (document.readyState==='complete' && !!document.body && !!document.body.childNodes.length)"
-        #         try:
-        #             return self._current_browser().execute_script(js)
-        #         except:
-        #             return False
-        #
-        #     response = self._retry(process, predicate, timeout)
-        #     if not response['predicate']:
-        #         raise AssertionError(error)
