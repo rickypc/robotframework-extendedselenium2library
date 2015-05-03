@@ -211,6 +211,14 @@ class ExtendedSelenium2Library(Selenium2Library.Selenium2Library):
         self._wait_until_page_ready()
         self.wait_until_angular_ready()
 
+    def is_element_visible(self, locator):
+        """Returns element visibility identified by `locator`.
+
+        Key attributes for arbitrary elements are `id` and `name`. See
+        `introduction` for details about locating elements.
+        """
+        return self._is_visible(locator)
+
     def open_browser(self, url, browser='firefox', alias=None,remote_url=False,
                      desired_capabilities=None,ff_profile_dir=None):
         """Opens a new browser instance to given URL.
@@ -386,16 +394,19 @@ class ExtendedSelenium2Library(Selenium2Library.Selenium2Library):
         """
         if not error:
             error = "Condition '%s' did not become true in <TIMEOUT>" % condition
-        def process(condition):
+        def process(condition, timeout):
             try:
                 return self._current_browser().execute_async_script(condition)
             except:
-                self._current_browser().set_script_timeout(self._timeout_in_secs)
+                if timeout != self._timeout_in_secs:
+                    self._current_browser().set_script_timeout(self._timeout_in_secs)
                 return False
         timeout = self._timeout_in_secs if timeout is None else utils.timestr_to_secs(timeout)
-        self._current_browser().set_script_timeout(timeout)
-        self._wait_until(timeout, error, lambda: process(condition) == True)
-        self._current_browser().set_script_timeout(self._timeout_in_secs)
+        if timeout != self._timeout_in_secs:
+            self._current_browser().set_script_timeout(timeout)
+        self._wait_until(timeout, error, lambda: process(condition, timeout) == True)
+        if timeout != self._timeout_in_secs:
+            self._current_browser().set_script_timeout(self._timeout_in_secs)
 
     def wait_until_angular_ready(self, timeout=None, error=None):
         """Waits until AngularJS is ready to process next request or `timeout` expires.
@@ -414,16 +425,19 @@ class ExtendedSelenium2Library(Selenium2Library.Selenium2Library):
                 error = 'AngularJS is not ready in <TIMEOUT>'
             js = self.NG_WRAPPER % {'prefix': 'var cb=arguments[arguments.length-1];',
                                     'handler': 'function(){cb(true)}'}
-            def process(condition):
+            def process(condition, timeout):
                 try:
                     return self._current_browser().execute_async_script(condition)
                 except:
-                    self._current_browser().set_script_timeout(self._timeout_in_secs)
+                    if timeout != self._timeout_in_secs:
+                        self._current_browser().set_script_timeout(self._timeout_in_secs)
                     return False
             timeout = self._timeout_in_secs if timeout is None else utils.timestr_to_secs(timeout)
-            self._current_browser().set_script_timeout(timeout)
-            self._wait_until(timeout, error, lambda: process(js) == True)
-            self._current_browser().set_script_timeout(self._timeout_in_secs)
+            if timeout != self._timeout_in_secs:
+                self._current_browser().set_script_timeout(timeout)
+            self._wait_until(timeout, error, lambda: process(js, timeout) == True)
+            if timeout != self._timeout_in_secs:
+                self._current_browser().set_script_timeout(self._timeout_in_secs)
 
     def wait_until_element_is_not_visible(self, locator, timeout=None, error=None):
         """Waits until element specified with `locator` is not visible.
@@ -561,13 +575,16 @@ class ExtendedSelenium2Library(Selenium2Library.Selenium2Library):
             if not error:
                 error = 'Document is not ready in <TIMEOUT>'
             js = 'return (document.readyState===\'complete\' && !!document.body && !!document.body.childNodes.length)'
-            def process(condition):
+            def process(condition, timeout):
                 try:
                     return self._current_browser().execute_script(condition)
                 except:
-                    self._current_browser().set_script_timeout(self._timeout_in_secs)
+                    if timeout != self._timeout_in_secs:
+                        self._current_browser().set_script_timeout(self._timeout_in_secs)
                     return False
             timeout = self._timeout_in_secs if timeout is None else utils.timestr_to_secs(timeout)
-            self._current_browser().set_script_timeout(timeout)
-            self._wait_until(timeout, error, lambda: process(js) == True)
-            self._current_browser().set_script_timeout(self._timeout_in_secs)
+            if timeout != self._timeout_in_secs:
+                self._current_browser().set_script_timeout(timeout)
+            self._wait_until(timeout, error, lambda: process(js, timeout) == True)
+            if timeout != self._timeout_in_secs:
+                self._current_browser().set_script_timeout(self._timeout_in_secs)
