@@ -370,6 +370,33 @@ class ExtendedSelenium2Library(Selenium2Library.Selenium2Library):
         self._wait_until_page_ready()
         self.wait_until_angular_ready()
 
+    def wait_for_async_condition(self, condition, timeout=None, error=None):
+        """Waits until the given asynchronous `condition` is true or `timeout` expires.
+
+        The `condition` can be arbitrary JavaScript expression but must explicitly signal they are finished
+        by invoking the provided callback at the end.
+        See `Execute Async Javascript` for information about executing asynchronous JavaScript.
+
+        `error` can be used to override the default error message.
+
+        See `introduction` for more information about `timeout` and its default value.
+
+        See also `Wait For Condition`, `Wait Until Page Contains`, `Wait Until Page Contains
+        Element`, `Wait Until Element Is Visible` and BuiltIn keyword `Wait Until Keyword Succeeds`.
+        """
+        if not error:
+            error = "Condition '%s' did not become true in <TIMEOUT>" % condition
+        def process(condition):
+            try:
+                return self._current_browser().execute_async_script(condition)
+            except:
+                self._current_browser().set_script_timeout(self._timeout_in_secs)
+                return False
+        timeout = self._timeout_in_secs if timeout is None else utils.timestr_to_secs(timeout)
+        self._current_browser().set_script_timeout(timeout)
+        self._wait_until(timeout, error, lambda: process(condition) == True)
+        self._current_browser().set_script_timeout(self._timeout_in_secs)
+
     def wait_until_angular_ready(self, timeout=None, error=None):
         """Waits until AngularJS is ready to process next request or `timeout` expires.
 
@@ -383,24 +410,40 @@ class ExtendedSelenium2Library(Selenium2Library.Selenium2Library):
         and BuiltIn keyword `Wait Until Keyword Succeeds`.
         """
         if self._is_angular_page():
-            timeout = self._timeout_in_secs if timeout is None else utils.timestr_to_secs(timeout)
             if not error:
-                error = 'AngularJS is not ready in %ss.' % timeout
-
-            def predicate(process_response):
-                return process_response
-
-            def process():
-                js = self.NG_WRAPPER % {'prefix': 'var cb=arguments[arguments.length-1];',
-                                        'handler': 'function(){cb(true)}'}
+                error = 'AngularJS is not ready in <TIMEOUT>'
+            js = self.NG_WRAPPER % {'prefix': 'var cb=arguments[arguments.length-1];',
+                                    'handler': 'function(){cb(true)}'}
+            def process(condition):
                 try:
-                    return self._current_browser().execute_async_script(js)
+                    return self._current_browser().execute_async_script(condition)
                 except:
+                    self._current_browser().set_script_timeout(self._timeout_in_secs)
                     return False
+            timeout = self._timeout_in_secs if timeout is None else utils.timestr_to_secs(timeout)
+            self._current_browser().set_script_timeout(timeout)
+            self._wait_until(timeout, error, lambda: process(js) == True)
+            self._current_browser().set_script_timeout(self._timeout_in_secs)
 
-            response = self._retry(process, predicate, timeout)
-            if not response['predicate']:
-                raise AssertionError(error)
+        # if self._is_angular_page():
+        #     timeout = self._timeout_in_secs if timeout is None else utils.timestr_to_secs(timeout)
+        #     if not error:
+        #         error = 'AngularJS is not ready in %ss.' % timeout
+        #
+        #     def predicate(process_response):
+        #         return process_response
+        #
+        #     def process():
+        #         js = self.NG_WRAPPER % {'prefix': 'var cb=arguments[arguments.length-1];',
+        #                                 'handler': 'function(){cb(true)}'}
+        #         try:
+        #             return self._current_browser().execute_async_script(js)
+        #         except:
+        #             return False
+        #
+        #     response = self._retry(process, predicate, timeout)
+        #     if not response['predicate']:
+        #         raise AssertionError(error)
 
     def wait_until_element_is_not_visible(self, locator, timeout=None, error=None):
         """Waits until element specified with `locator` is not visible.
@@ -420,10 +463,9 @@ class ExtendedSelenium2Library(Selenium2Library.Selenium2Library):
             if invisible:
                 return
             elif invisible is None:
-                return error or "Element locator '%s' did not match any elements after %s" %\
-                                (locator, self._format_timeout(timeout))
+                return error or "Element locator '%s' did not match any elements after <TIMEOUT>" % locator
             else:
-                return error or "Element '%s' was visible in %s" % (locator, self._format_timeout(timeout))
+                return error or "Element '%s' was visible in <TIMEOUT>" % locator
         self._wait_until_no_error(timeout, check_invisibility)
 
     def _angular_select_checkbox_or_radio_button(self, element):
@@ -580,20 +622,37 @@ class ExtendedSelenium2Library(Selenium2Library.Selenium2Library):
         if self._block_until_page_ready:
             # let the browser take a deep breath...
             sleep(self._browser_breath_delay)
-            timeout = self._timeout_in_secs if timeout is None else utils.timestr_to_secs(timeout)
             if not error:
-                error = 'Document is not ready in %ss.' % timeout
-
-            def predicate(process_response):
-                return process_response
-
-            def process():
-                js = "return (document.readyState==='complete' && !!document.body && !!document.body.childNodes.length)"
+                error = 'Document is not ready in <TIMEOUT>'
+            js = 'return (document.readyState===\'complete\' && !!document.body && !!document.body.childNodes.length)'
+            def process(condition):
                 try:
-                    return self._current_browser().execute_script(js)
+                    return self._current_browser().execute_script(condition)
                 except:
+                    self._current_browser().set_script_timeout(self._timeout_in_secs)
                     return False
+            timeout = self._timeout_in_secs if timeout is None else utils.timestr_to_secs(timeout)
+            self._current_browser().set_script_timeout(timeout)
+            self._wait_until(timeout, error, lambda: process(js) == True)
+            self._current_browser().set_script_timeout(self._timeout_in_secs)
 
-            response = self._retry(process, predicate, timeout)
-            if not response['predicate']:
-                raise AssertionError(error)
+        # if self._block_until_page_ready:
+        #     # let the browser take a deep breath...
+        #     sleep(self._browser_breath_delay)
+        #     timeout = self._timeout_in_secs if timeout is None else utils.timestr_to_secs(timeout)
+        #     if not error:
+        #         error = 'Document is not ready in %ss.' % timeout
+        #
+        #     def predicate(process_response):
+        #         return process_response
+        #
+        #     def process():
+        #         js = "return (document.readyState==='complete' && !!document.body && !!document.body.childNodes.length)"
+        #         try:
+        #             return self._current_browser().execute_script(js)
+        #         except:
+        #             return False
+        #
+        #     response = self._retry(process, predicate, timeout)
+        #     if not response['predicate']:
+        #         raise AssertionError(error)
