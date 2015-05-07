@@ -105,7 +105,8 @@ class ExtendedSelenium2Library(Selenium2Library.Selenium2Library):
 
     NG_WRAPPER = '%(prefix)s' \
                  'angular.element(document.querySelector(\'[data-ng-app]\')||document).injector().' \
-                 'get(\'$browser\').notifyWhenNoOutstandingRequests(%(handler)s)'
+                 'get(\'$browser\').notifyWhenNoOutstandingRequests(%(handler)s)' \
+                 '%(suffix)s'
     ROBOT_EXIT_ON_FAILURE = True
     ROBOT_LIBRARY_SCOPE = 'TEST SUITE'
 
@@ -423,8 +424,10 @@ class ExtendedSelenium2Library(Selenium2Library.Selenium2Library):
         if self._is_angular_page():
             if not error:
                 error = 'AngularJS is not ready in <TIMEOUT>'
-            js = self.NG_WRAPPER % {'prefix': 'var cb=arguments[arguments.length-1];',
-                                    'handler': 'function(){cb(true)}'}
+            # we add more validation here to support transition between AngularJs to non AngularJS page.
+            js = self.NG_WRAPPER % {'prefix': 'var cb=arguments[arguments.length-1];if(window.angular){',
+                                    'handler': 'function(){cb(true)}',
+                                    'suffix': '}else{cb(true)}'}
             def process(condition, timeout):
                 try:
                     return self._current_browser().execute_async_script(condition)
@@ -468,7 +471,8 @@ class ExtendedSelenium2Library(Selenium2Library.Selenium2Library):
         # you will operating in different scope
         js = self.NG_WRAPPER % {'prefix': 'var obj=arguments[0];',
                                 'handler': 'function(){angular.element(obj).prop(\'checked\',true).'
-                                'triggerHandler(\'click\')}'}
+                                'triggerHandler(\'click\')}',
+                                'suffix': ''}
         self._debug("Executing JavaScript:\n%s" % js)
         self._current_browser().execute_script(js, element)
         self._wait_until_page_ready()
@@ -481,7 +485,8 @@ class ExtendedSelenium2Library(Selenium2Library.Selenium2Library):
         if self._is_angular_control(element):
             # you will operating in different scope
             js = self.NG_WRAPPER % {'prefix': 'var obj=arguments[0];',
-                                    'handler': 'function(){angular.element(obj).triggerHandler(\'change\')}'}
+                                    'handler': 'function(){angular.element(obj).triggerHandler(\'change\')}',
+                                    'suffix': ''}
             self._debug("Executing JavaScript:\n%s" % js)
             self._current_browser().execute_script(js, element)
             self._wait_until_page_ready()
@@ -498,7 +503,8 @@ class ExtendedSelenium2Library(Selenium2Library.Selenium2Library):
             # you will operating in different scope
             js = self.NG_WRAPPER % {'prefix': 'var obj=arguments[0];var text=arguments[1];',
                                     'handler': 'function(){var el=angular.element(obj).val(text);' +
-                                               'el.triggerHandler(\'change\');el.triggerHandler(\'blur\')}'}
+                                               'el.triggerHandler(\'change\');el.triggerHandler(\'blur\')}',
+                                    'suffix': ''}
             self._debug("Executing JavaScript:\n%s" % js)
             self._current_browser().execute_script(js, element, text)
             self._wait_until_page_ready()
