@@ -19,6 +19,8 @@ import Selenium2Library
 #from ExtendedSelenium2Library.locators import ExtendedElementFinder
 from ExtendedSelenium2Library.version import get_version
 from robot import utils
+from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.support.expected_conditions import staleness_of, visibility_of
 from time import sleep, time
 
 __version__ = get_version()
@@ -393,21 +395,10 @@ class ExtendedSelenium2Library(Selenium2Library.Selenium2Library):
         See also `Wait For Condition`, `Wait Until Page Contains`, `Wait Until Page Contains
         Element`, `Wait Until Element Is Visible` and BuiltIn keyword `Wait Until Keyword Succeeds`.
         """
-        if not error:
-            error = "Condition '%s' did not become true in <TIMEOUT>" % condition
-        def process(condition, timeout):
-            try:
-                return self._current_browser().execute_async_script(condition)
-            except:
-                if timeout != self._timeout_in_secs:
-                    self._current_browser().set_script_timeout(self._timeout_in_secs)
-                return False
         timeout = self._timeout_in_secs if timeout is None else utils.timestr_to_secs(timeout)
-        if timeout != self._timeout_in_secs:
-            self._current_browser().set_script_timeout(timeout)
-        self._wait_until(timeout, error, lambda: process(condition, timeout) == True)
-        if timeout != self._timeout_in_secs:
-            self._current_browser().set_script_timeout(self._timeout_in_secs)
+        if not error:
+            error = "Condition '%s' did not become true in %s" % (condition, self._format_timeout(timeout))
+        WebDriverWait(self._current_browser(), timeout).until(lambda driver: driver.execute_async_script(js), error)
 
     def wait_until_angular_ready(self, timeout=None, error=None):
         """Waits until AngularJS is ready to process next request or `timeout` expires.
@@ -421,26 +412,24 @@ class ExtendedSelenium2Library(Selenium2Library.Selenium2Library):
         `Wait Until Page Contains Element`, `Wait Until Element Is Visible`
         and BuiltIn keyword `Wait Until Keyword Succeeds`.
         """
-        if self._is_angular_page():
-            if not error:
-                error = 'AngularJS is not ready in <TIMEOUT>'
-            # we add more validation here to support transition between AngularJs to non AngularJS page.
-            js = self.NG_WRAPPER % {'prefix': 'var cb=arguments[arguments.length-1];if(window.angular){',
-                                    'handler': 'function(){cb(true)}',
-                                    'suffix': '}else{cb(true)}'}
-            def process(condition, timeout):
-                try:
-                    return self._current_browser().execute_async_script(condition)
-                except:
-                    if timeout != self._timeout_in_secs:
-                        self._current_browser().set_script_timeout(self._timeout_in_secs)
-                    return False
-            timeout = self._timeout_in_secs if timeout is None else utils.timestr_to_secs(timeout)
-            if timeout != self._timeout_in_secs:
-                self._current_browser().set_script_timeout(timeout)
-            self._wait_until(timeout, error, lambda: process(js, timeout) == True)
-            if timeout != self._timeout_in_secs:
-                self._current_browser().set_script_timeout(self._timeout_in_secs)
+        timeout = self._implicit_wait_in_secs if timeout is None else utils.timestr_to_secs(timeout)
+        if not error:
+            error = 'AngularJS is not ready in %s' % self._format_timeout(timeout)
+        # we add more validation here to support transition between AngularJs to non AngularJS page.
+        js = self.NG_WRAPPER % {'prefix': 'var cb=arguments[arguments.length-1];if(window.angular){',
+                                'handler': 'function(){cb(true)}',
+                                'suffix': '}else{cb(true)}'}
+        try:
+            WebDriverWait(self._current_browser(), timeout).until(lambda driver: driver.execute_async_script(js), error)
+        except:
+            # still inflight, second chance. let the browser take a deep breath...
+            sleep(self._browser_breath_delay)
+            try:
+                WebDriverWait(self._current_browser(), timeout).until(lambda driver: driver.execute_async_script(js),
+                                                                      error)
+            except:
+                # instead of halting the process because AngularJS is not ready in <TIMEOUT>, we try our luck...
+                pass
 
     def wait_until_element_is_not_visible(self, locator, timeout=None, error=None):
         """Waits until element specified with `locator` is not visible.
@@ -451,19 +440,32 @@ class ExtendedSelenium2Library(Selenium2Library.Selenium2Library):
 
         `error` can be used to override the default error message.
 
+        See also `Wait Until Element Is Visible`, `Wait Until Page Contains`,
+        `Wait Until Page Contains Element`, `Wait For Condition` and
+        BuiltIn keyword `Wait Until Keyword Succeeds`.
+        """
+        timeout = self._implicit_wait_in_secs if timeout is None else utils.timestr_to_secs(timeout)
+        if not error:
+            error = 'Element \'%s\' was still visible after %s' % (locator, self._format_timeout(timeout))
+        WebDriverWait(None, timeout).until_not(visibility_of(self._element_find(locator, True, True)), error)
+
+    def wait_until_element_is_visible(self, locator, timeout=None, error=None):
+        """Waits until element specified with `locator` is visible.
+
+        Fails if `timeout` expires before the element is visible. See
+        `introduction` for more information about `timeout` and its
+        default value.
+
+        `error` can be used to override the default error message.
+
         See also `Wait Until Element Is Not Visible`, `Wait Until Page Contains`,
         `Wait Until Page Contains Element`, `Wait For Condition` and
         BuiltIn keyword `Wait Until Keyword Succeeds`.
         """
-        def check_invisibility():
-            invisible = not self._is_visible(locator)
-            if invisible:
-                return
-            elif invisible is None:
-                return error or "Element locator '%s' did not match any elements after <TIMEOUT>" % locator
-            else:
-                return error or "Element '%s' was visible in <TIMEOUT>" % locator
-        self._wait_until_no_error(timeout, check_invisibility)
+        timeout = self._implicit_wait_in_secs if timeout is None else utils.timestr_to_secs(timeout)
+        if not error:
+            error = 'Element \'%s\' was not visible in %s' % (locator, self._format_timeout(timeout))
+        WebDriverWait(None, timeout).until(visibility_of(self._element_find(locator, True, True)), error)
 
     def _angular_select_checkbox_or_radio_button(self, element):
         if element is None:
@@ -542,7 +544,7 @@ class ExtendedSelenium2Library(Selenium2Library.Selenium2Library):
 
     def _is_angular_page(self):
         js = 'return !!window.angular'
-        self._debug("Executing JavaScript:\n%s" % js)
+        self._debug("Executing JavaScript: %s" % js)
         try:
             return self._current_browser().execute_script(js)
         except:
@@ -576,21 +578,23 @@ class ExtendedSelenium2Library(Selenium2Library.Selenium2Library):
 
     def _wait_until_page_ready(self, timeout=None, error=None):
         if self._block_until_page_ready:
+            delay = self._browser_breath_delay
+            if delay < 1:
+                delay *= 10
             # let the browser take a deep breath...
-            sleep(self._browser_breath_delay)
+            sleep(delay)
+            timeout = self._implicit_wait_in_secs if timeout is None else utils.timestr_to_secs(timeout)
             if not error:
-                error = 'Document is not ready in <TIMEOUT>'
+                error = 'Document is not ready in %s' % self._format_timeout(timeout)
+            browser = self._current_browser()
             js = 'return (document.readyState===\'complete\' && !!document.body && !!document.body.childNodes.length)'
-            def process(condition, timeout):
-                try:
-                    return self._current_browser().execute_script(condition)
-                except:
-                    if timeout != self._timeout_in_secs:
-                        self._current_browser().set_script_timeout(self._timeout_in_secs)
-                    return False
-            timeout = self._timeout_in_secs if timeout is None else utils.timestr_to_secs(timeout)
-            if timeout != self._timeout_in_secs:
-                self._current_browser().set_script_timeout(timeout)
-            self._wait_until(timeout, error, lambda: process(js, timeout) == True)
-            if timeout != self._timeout_in_secs:
-                self._current_browser().set_script_timeout(self._timeout_in_secs)
+            try:
+                WebDriverWait(None, timeout).until_not(staleness_of(browser.find_element_by_tag_name('body')), error)
+            except:
+                # instead of halting the process because document is not ready in <TIMEOUT>, we try our luck...
+                pass
+            try:
+                WebDriverWait(browser, timeout).until(lambda driver: driver.execute_script(js), error)
+            except:
+                # instead of halting the process because document is not ready in <TIMEOUT>, we try our luck...
+                pass
