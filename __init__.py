@@ -222,6 +222,14 @@ class ExtendedSelenium2Library(Selenium2Library.Selenium2Library):
         """
         return self._is_visible(locator)
 
+    def location_should_be(self, url):
+        """Verifies that current URL is exactly `url`."""
+        # cross browser support
+        actual = self._current_browser().execute_script('return document.location.href')
+        if  actual != url:
+            raise AssertionError("Location should have been '%s' but was '%s'." % (url, actual))
+        self._debug("Current location is '%s'." % url)
+
     def open_browser(self, url, browser='firefox', alias=None,remote_url=False,
                      desired_capabilities=None,ff_profile_dir=None):
         """Opens a new browser instance to given URL.
