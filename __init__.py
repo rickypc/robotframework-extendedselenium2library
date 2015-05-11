@@ -455,7 +455,10 @@ class ExtendedSelenium2Library(Selenium2Library.Selenium2Library):
         timeout = self._implicit_wait_in_secs if timeout is None else utils.timestr_to_secs(timeout)
         if not error:
             error = 'Element \'%s\' was still visible after %s' % (locator, self._format_timeout(timeout))
-        WebDriverWait(None, timeout).until_not(visibility_of(self._element_find(locator, True, True)), error)
+        element = self._element_find(locator, True, True)
+        if element is None:
+            raise AssertionError("Element '%s' not found." % locator)
+        WebDriverWait(None, timeout).until_not(visibility_of(element), error)
 
     def wait_until_element_is_visible(self, locator, timeout=None, error=None):
         """Waits until element specified with `locator` is visible.
@@ -473,7 +476,10 @@ class ExtendedSelenium2Library(Selenium2Library.Selenium2Library):
         timeout = self._implicit_wait_in_secs if timeout is None else utils.timestr_to_secs(timeout)
         if not error:
             error = 'Element \'%s\' was not visible in %s' % (locator, self._format_timeout(timeout))
-        WebDriverWait(None, timeout).until(visibility_of(self._element_find(locator, True, True)), error)
+        element = self._element_find(locator, True, True)
+        if element is None:
+            raise AssertionError("Element '%s' not found." % locator)
+        WebDriverWait(None, timeout).until(visibility_of(element), error)
 
     def _angular_select_checkbox_or_radio_button(self, element):
         if element is None:
