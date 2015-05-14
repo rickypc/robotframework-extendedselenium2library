@@ -16,6 +16,7 @@
 # limitations under the License.
 
 import Selenium2Library
+import sys
 #from ExtendedSelenium2Library.locators import ExtendedElementFinder
 from ExtendedSelenium2Library.version import get_version
 from robot import utils
@@ -112,8 +113,8 @@ class ExtendedSelenium2Library(Selenium2Library.Selenium2Library):
     ROBOT_EXIT_ON_FAILURE = True
     ROBOT_LIBRARY_SCOPE = 'TEST SUITE'
 
-    def __init__(self, timeout=5.0, implicit_wait=0.0, run_on_failure='Capture Page Screenshot',
-                 block_until_page_ready=False, browser_breath_delay=0.05):
+    def __init__(self, timeout=90.0, implicit_wait=15.0, run_on_failure='Capture Page Screenshot',
+                 block_until_page_ready=True, browser_breath_delay=0.05, poll_frequency=0.2):
         """ExtendedSelenium2Library can be imported with optional arguments.
 
         `timeout` is the default timeout used to wait for all waiting actions.
@@ -144,6 +145,7 @@ class ExtendedSelenium2Library(Selenium2Library.Selenium2Library):
         Selenium2Library.Selenium2Library.__init__(self, timeout, implicit_wait, run_on_failure)
         self._block_until_page_ready = block_until_page_ready
         self._browser_breath_delay = 0.05 if browser_breath_delay is None else float(browser_breath_delay)
+        self._poll_frequency = 0.2 if poll_frequency is None else float(poll_frequency)
         #self._element_finder = ExtendedElementFinder()
 
     def click_button(self, locator):
@@ -406,7 +408,8 @@ class ExtendedSelenium2Library(Selenium2Library.Selenium2Library):
         timeout = self._timeout_in_secs if timeout is None else utils.timestr_to_secs(timeout)
         if not error:
             error = "Condition '%s' did not become true in %s" % (condition, self._format_timeout(timeout))
-        WebDriverWait(self._current_browser(), timeout).until(lambda driver: driver.execute_async_script(js), error)
+        WebDriverWait(self._current_browser(), timeout, self._poll_frequency).\
+            until(lambda driver: driver.execute_async_script(js), error)
 
     def wait_until_angular_ready(self, timeout=None, error=None):
         """Waits until AngularJS is ready to process next request or `timeout` expires.
@@ -428,15 +431,18 @@ class ExtendedSelenium2Library(Selenium2Library.Selenium2Library):
                                 'handler': 'function(){cb(true)}',
                                 'suffix': '}else{cb(true)}'}
         try:
-            WebDriverWait(self._current_browser(), timeout).until(lambda driver: driver.execute_async_script(js), error)
+            WebDriverWait(self._current_browser(), timeout, self._poll_frequency).\
+                until(lambda driver: driver.execute_async_script(js), error)
         except:
+            self._debug(sys.exc_info()[0])
             # still inflight, second chance. let the browser take a deep breath...
             sleep(self._browser_breath_delay)
             try:
-                WebDriverWait(self._current_browser(), timeout).until(lambda driver: driver.execute_async_script(js),
-                                                                      error)
+                WebDriverWait(self._current_browser(), timeout, self._poll_frequency).\
+                    until(lambda driver: driver.execute_async_script(js), error)
             except:
                 # instead of halting the process because AngularJS is not ready in <TIMEOUT>, we try our luck...
+                self._debug(sys.exc_info()[0])
                 pass
 
     def wait_until_element_is_not_visible(self, locator, timeout=None, error=None):
@@ -458,7 +464,7 @@ class ExtendedSelenium2Library(Selenium2Library.Selenium2Library):
         element = self._element_find(locator, True, True)
         if element is None:
             raise AssertionError("Element '%s' not found." % locator)
-        WebDriverWait(None, timeout).until_not(visibility_of(element), error)
+        WebDriverWait(None, timeout, self._poll_frequency).until_not(visibility_of(element), error)
 
     def wait_until_element_is_visible(self, locator, timeout=None, error=None):
         """Waits until element specified with `locator` is visible.
@@ -479,7 +485,7 @@ class ExtendedSelenium2Library(Selenium2Library.Selenium2Library):
         element = self._element_find(locator, True, True)
         if element is None:
             raise AssertionError("Element '%s' not found." % locator)
-        WebDriverWait(None, timeout).until(visibility_of(element), error)
+        WebDriverWait(None, timeout, self._poll_frequency).until(visibility_of(element), error)
 
     def _angular_select_checkbox_or_radio_button(self, element):
         if element is None:
@@ -562,6 +568,7 @@ class ExtendedSelenium2Library(Selenium2Library.Selenium2Library):
         try:
             return self._current_browser().execute_script(js)
         except:
+            self._debug(sys.exc_info()[0])
             return False
 
     def _is_firefox(self, browser_name=None):
@@ -590,7 +597,8 @@ class ExtendedSelenium2Library(Selenium2Library.Selenium2Library):
             element.click()
             self._wait_until_page_ready()
 
-    def _wait_until_page_ready(self, timeout=None, error=None):
+    # semi blocking API that incorporated different strategies for cross browser support
+    def _wait_until_page_ready(self, timeout=None):
         if self._block_until_page_ready:
             delay = self._browser_breath_delay
             if delay < 1:
@@ -598,17 +606,19 @@ class ExtendedSelenium2Library(Selenium2Library.Selenium2Library):
             # let the browser take a deep breath...
             sleep(delay)
             timeout = self._implicit_wait_in_secs if timeout is None else utils.timestr_to_secs(timeout)
-            if not error:
-                error = 'Document is not ready in %s' % self._format_timeout(timeout)
             browser = self._current_browser()
             js = 'return (document.readyState===\'complete\' && !!document.body && !!document.body.childNodes.length)'
             try:
-                WebDriverWait(None, timeout).until_not(staleness_of(browser.find_element_by_tag_name('body')), error)
+                WebDriverWait(None, timeout, self._poll_frequency).\
+                    until_not(staleness_of(browser.find_element_by_tag_name('body')), '')
             except:
                 # instead of halting the process because document is not ready in <TIMEOUT>, we try our luck...
+                self._debug(sys.exc_info()[0])
                 pass
             try:
-                WebDriverWait(browser, timeout).until(lambda driver: driver.execute_script(js), error)
+                WebDriverWait(browser, timeout, self._poll_frequency).\
+                    until(lambda driver: driver.execute_script(js), '')
             except:
                 # instead of halting the process because document is not ready in <TIMEOUT>, we try our luck...
+                self._debug(sys.exc_info()[0])
                 pass
