@@ -582,13 +582,13 @@ class ExtendedSelenium2Library(Selenium2Library.Selenium2Library):
         return browser_name == 'internetexplorer' or browser_name == 'ie'
 
     def _scroll_into_view(self, locator):
-        if self._is_internet_explorer():
-            element = self._element_find(locator, True, True)
-            if element is None:
-                raise AssertionError("Element '%s' not found." % locator)
-            js = 'arguments[0].scrollIntoView(true)'
-            self._debug("Executing JavaScript:\n%s" % js)
-            self._current_browser().execute_script(js, element)
+        #if self._is_internet_explorer():
+        element = self._element_find(locator, True, True)
+        if element is None:
+            raise AssertionError("Element '%s' not found." % locator)
+        js = 'arguments[0].scrollIntoView(true)'
+        self._debug("Executing JavaScript:\n%s" % js)
+        self._current_browser().execute_script(js, element)
 
     def _select_checkbox_or_radio_button(self, element):
         if self._is_angular_control(element):
