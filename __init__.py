@@ -20,6 +20,7 @@ import sys
 #from ExtendedSelenium2Library.locators import ExtendedElementFinder
 from ExtendedSelenium2Library.version import get_version
 from robot import utils
+from selenium.common.exceptions import TimeoutException
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support.expected_conditions import staleness_of, visibility_of
 from time import sleep, time
@@ -436,6 +437,9 @@ class ExtendedSelenium2Library(Selenium2Library.Selenium2Library):
         try:
             WebDriverWait(browser, timeout, self._poll_frequency).\
                 until(lambda driver: driver.execute_async_script(js), error)
+        except TimeoutException:
+            # prevent double wait
+            pass
         except:
             self._debug(sys.exc_info()[0])
             # still inflight, second chance. let the browser take a deep breath...
