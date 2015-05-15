@@ -145,6 +145,7 @@ class ExtendedSelenium2Library(Selenium2Library.Selenium2Library):
         Selenium2Library.Selenium2Library.__init__(self, timeout, implicit_wait, run_on_failure)
         self._block_until_page_ready = block_until_page_ready
         self._browser_breath_delay = 0.05 if browser_breath_delay is None else float(browser_breath_delay)
+        self._implicit_wait_in_secs = 15.0 if implicit_wait is None else float(implicit_wait)
         self._poll_frequency = 0.2 if poll_frequency is None else float(poll_frequency)
         #self._element_finder = ExtendedElementFinder()
 
@@ -430,20 +431,26 @@ class ExtendedSelenium2Library(Selenium2Library.Selenium2Library):
         js = self.NG_WRAPPER % {'prefix': 'var cb=arguments[arguments.length-1];if(window.angular){',
                                 'handler': 'function(){cb(true)}',
                                 'suffix': '}else{cb(true)}'}
+        browser = self._current_browser()
+        browser.set_script_timeout(timeout)
         try:
-            WebDriverWait(self._current_browser(), timeout, self._poll_frequency).\
+            WebDriverWait(browser, timeout, self._poll_frequency).\
                 until(lambda driver: driver.execute_async_script(js), error)
         except:
             self._debug(sys.exc_info()[0])
             # still inflight, second chance. let the browser take a deep breath...
             sleep(self._browser_breath_delay)
             try:
-                WebDriverWait(self._current_browser(), timeout, self._poll_frequency).\
+                WebDriverWait(browser, timeout, self._poll_frequency).\
                     until(lambda driver: driver.execute_async_script(js), error)
             except:
                 # instead of halting the process because AngularJS is not ready in <TIMEOUT>, we try our luck...
                 self._debug(sys.exc_info()[0])
                 pass
+            finally:
+                browser.set_script_timeout(self._timeout_in_secs)
+        finally:
+            browser.set_script_timeout(self._timeout_in_secs)
 
     def wait_until_element_is_not_visible(self, locator, timeout=None, error=None):
         """Waits until element specified with `locator` is not visible.
@@ -582,13 +589,13 @@ class ExtendedSelenium2Library(Selenium2Library.Selenium2Library):
         return browser_name == 'internetexplorer' or browser_name == 'ie'
 
     def _scroll_into_view(self, locator):
-        #if self._is_internet_explorer():
-        element = self._element_find(locator, True, True)
-        if element is None:
-            raise AssertionError("Element '%s' not found." % locator)
-        js = 'arguments[0].scrollIntoView(false)'
-        self._debug("Executing JavaScript:\n%s" % js)
-        self._current_browser().execute_script(js, element)
+        if self._is_internet_explorer():
+            element = self._element_find(locator, True, True)
+            if element is None:
+                raise AssertionError("Element '%s' not found." % locator)
+            js = 'arguments[0].scrollIntoView(false)'
+            self._debug("Executing JavaScript:\n%s" % js)
+            self._current_browser().execute_script(js, element)
 
     def _select_checkbox_or_radio_button(self, element):
         if self._is_angular_control(element):
