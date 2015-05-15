@@ -586,7 +586,7 @@ class ExtendedSelenium2Library(Selenium2Library.Selenium2Library):
         element = self._element_find(locator, True, True)
         if element is None:
             raise AssertionError("Element '%s' not found." % locator)
-        js = 'arguments[0].scrollIntoView(true)'
+        js = 'arguments[0].scrollIntoView(false)'
         self._debug("Executing JavaScript:\n%s" % js)
         self._current_browser().execute_script(js, element)
 
