@@ -107,15 +107,22 @@ class ExtendedSelenium2Library(Selenium2Library.Selenium2Library):
     http://robotframework.googlecode.com/svn/trunk/doc/userguide/RobotFrameworkUserGuide.html#time-format.
     """
 
+    JQUERY_URL = '//code.jquery.com/jquery-1.11.3.min.js'
+    JQUERY_BOOTSTRAP = 'var a=document.getElementsByTagName(\'head\')[0];var b=document.createElement(\'script\');' \
+                       'b.type=\'text/javascript\';b.src=document.location.protocol+\'%(jquery_url)s\';a.appendChild(b);'
     NG_WRAPPER = '%(prefix)s' \
                  'angular.element(document.querySelector(\'[data-ng-app]\')||document).injector().' \
                  'get(\'$browser\').notifyWhenNoOutstandingRequests(%(handler)s)' \
                  '%(suffix)s'
+    PAGE_READY_WRAPPER = 'var cb=arguments[arguments.length-1];if(window.jQuery){' \
+                         '$(document).ready(function(){cb(true)})}else{'\
+                         '%(jquery_bootstrap)s' \
+                         'cb(document.readyState===\'complete\' && document.body && document.body.childNodes.length)}'
     ROBOT_EXIT_ON_FAILURE = True
     ROBOT_LIBRARY_SCOPE = 'TEST SUITE'
 
     def __init__(self, timeout=90.0, implicit_wait=15.0, run_on_failure='Capture Page Screenshot',
-                 block_until_page_ready=True, browser_breath_delay=0.05, poll_frequency=0.2):
+                 block_until_page_ready=True, browser_breath_delay=0.05, ensure_jq=True, poll_frequency=0.2):
         """ExtendedSelenium2Library can be imported with optional arguments.
 
         `timeout` is the default timeout used to wait for all waiting actions.
@@ -136,6 +143,14 @@ class ExtendedSelenium2Library(Selenium2Library.Selenium2Library):
         `Register Keyword To Run On Failure` keyword for more information about this
         functionality.
 
+        `block_until_page_ready` if it's true, will block the execution until the page ready.
+
+        `browser_breath_delay` is the delay in seconds to give the browser enough time to execute the next step.
+
+        `ensure_jq` if it's true, will ensure jQuery loaded on the page.
+
+        `poll_frequency` is the number in seconds to retry the next step.
+
         Examples:
         | Library `|` ExtendedSelenium2Library `|` 15                                            | # Sets default timeout to 15 seconds                                       |
         | Library `|` ExtendedSelenium2Library `|` 0 `|` 5                                       | # Sets default timeout to 0 seconds and default implicit_wait to 5 seconds |
@@ -146,7 +161,10 @@ class ExtendedSelenium2Library(Selenium2Library.Selenium2Library):
         Selenium2Library.Selenium2Library.__init__(self, timeout, implicit_wait, run_on_failure)
         self._block_until_page_ready = block_until_page_ready
         self._browser_breath_delay = 0.05 if browser_breath_delay is None else float(browser_breath_delay)
+        self._ensure_jq = True if ensure_jq else False
         self._implicit_wait_in_secs = 15.0 if implicit_wait is None else float(implicit_wait)
+        jquery_bootstrap = self.JQUERY_BOOTSTRAP % {'jquery_url': self.JQUERY_URL} if self._ensure_jq else ''
+        self._page_ready_bootstrap = self.PAGE_READY_WRAPPER % {'jquery_bootstrap': jquery_bootstrap}
         self._poll_frequency = 0.2 if poll_frequency is None else float(poll_frequency)
         #self._element_finder = ExtendedElementFinder()
 
@@ -618,7 +636,6 @@ class ExtendedSelenium2Library(Selenium2Library.Selenium2Library):
             sleep(delay)
             timeout = self._implicit_wait_in_secs if timeout is None else utils.timestr_to_secs(timeout)
             browser = self._current_browser()
-            js = 'return (document.readyState===\'complete\' && !!document.body && !!document.body.childNodes.length)'
             try:
                 WebDriverWait(None, timeout, self._poll_frequency).\
                     until_not(staleness_of(browser.find_element_by_tag_name('body')), '')
@@ -628,7 +645,7 @@ class ExtendedSelenium2Library(Selenium2Library.Selenium2Library):
                 pass
             try:
                 WebDriverWait(browser, timeout, self._poll_frequency).\
-                    until(lambda driver: driver.execute_script(js), '')
+                    until(lambda driver: driver.execute_async_script(self._page_ready_bootstrap), '')
             except:
                 # instead of halting the process because document is not ready in <TIMEOUT>, we try our luck...
                 self._debug(sys.exc_info()[0])
