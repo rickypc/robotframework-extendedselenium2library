@@ -138,7 +138,7 @@ Copyright (c) 2015 Richard Huang.
 This library is free software, licensed under: `GNU Affero General Public License (AGPL-3.0) <http://www.gnu.org/licenses/agpl-3.0.en.html>`_.
 
 .. _AngularJS: https://angularjs.org
-.. _Keyword Documentation: https://rickypc.github.com/robotframework-extendedselenium2library/doc/ExtendedSelenium2Library.html
+.. _Keyword Documentation: https://rickypc.github.io/robotframework-extendedselenium2library/doc/ExtendedSelenium2Library.html
 .. _Robot Framework: http://robotframework.org
 .. _Selenium: http://selenium.openqa.org
 .. _Selenium2Library: https://github.com/rtomac/robotframework-selenium2library/wiki
