@@ -84,7 +84,7 @@ and its dependencies yourself.
 
     gpg --keyserver pgp.mit.edu --search-keys D1406DE7
 
-- Type "1" to import the public key
+- Select the number from the list to import the public key
 
 - Verify the package against its PGP signature:
 
