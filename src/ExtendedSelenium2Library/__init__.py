@@ -121,7 +121,8 @@ class ExtendedSelenium2Library(Selenium2Library.Selenium2Library):
                          '%(jquery_bootstrap)s' \
                          'cb(document.readyState===\'complete\' && document.body && document.body.childNodes.length)}'
     ROBOT_EXIT_ON_FAILURE = True
-    ROBOT_LIBRARY_SCOPE = 'TEST SUITE'
+    ROBOT_LIBRARY_SCOPE = 'GLOBAL'
+    ROBOT_LIBRARY_VERSION = __version__
 
     def __init__(self, timeout=90.0, implicit_wait=15.0, run_on_failure='Capture Page Screenshot',
                  block_until_page_ready=True, browser_breath_delay=0.05, ensure_jq=True, poll_frequency=0.2):
