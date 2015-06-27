@@ -1,4 +1,3 @@
 include *.rst LICENSE
 recursive-include doc *.html
 recursive-include src *.py
-recursive-exclude src *.pyc
