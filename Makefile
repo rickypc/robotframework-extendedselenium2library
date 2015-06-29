@@ -30,6 +30,7 @@ version:
 
 documentation:clean
 	python -m robot.libdoc src/ExtendedSelenium2Library doc/ExtendedSelenium2Library.html
+	python -m analytics doc/ExtendedSelenium2Library.html
 
 documentation_on_github:clean
 	git checkout gh-pages
