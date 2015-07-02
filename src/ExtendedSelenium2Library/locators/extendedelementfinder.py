@@ -17,8 +17,23 @@
 #    You should have received a copy of the GNU Affero General Public License
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-VERSION = '0.5.0'
+from robot.utils import NormalizedDict
+from Selenium2Library.locators import ElementFinder
 
 
-def get_version():
-    return VERSION
+class ExtendedElementFinder(ElementFinder):
+
+    def __init__(self):
+        ElementFinder.__init__(self)
+        strategies = {
+            'model': self._find_by_ng_model
+        }
+        self._strategies.update(strategies)
+        self._default_strategies =  self._strategies.keys()
+        self._ng_prefixes = ['ng-','data-ng-','ng_','x-ng-','ng\\:']
+
+    def _find_by_ng_model(self, browser, model_name, tag, constraints):
+        stem = 'model="%s"' % model_name
+        joiner = '%s],[' % stem
+        criteria = '[' + joiner.join(self._ng_prefixes) + stem + ']'
+        return self._find_by_css_selector(browser, criteria, tag, constraints)

@@ -17,20 +17,20 @@
 #    You should have received a copy of the GNU Affero General Public License
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import Selenium2Library
-import sys
-#from ExtendedSelenium2Library.locators import ExtendedElementFinder
 from ExtendedSelenium2Library.version import get_version
+from locators import ExtendedElementFinder
 from robot import utils
 from selenium.common.exceptions import TimeoutException
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support.expected_conditions import staleness_of, visibility_of
+from Selenium2Library import Selenium2Library
+from sys import exc_info
 from time import sleep, time
 
 __version__ = get_version()
 
 
-class ExtendedSelenium2Library(Selenium2Library.Selenium2Library):
+class ExtendedSelenium2Library(Selenium2Library):
     """ExtendedSelenium2Library is a web testing library with AngularJS support and
     custom improvement for Robot Framework.
 
@@ -73,6 +73,7 @@ class ExtendedSelenium2Library(Selenium2Library.Selenium2Library):
     | jquery       | Click Element `|` jquery=div.my_class           | Matches by jQuery/sizzle selector                  |
     | sizzle       | Click Element `|` sizzle=div.my_class           | Matches by jQuery/sizzle selector                  |
     | tag          | Click Element `|` tag=div                       | Matches by HTML tag name                           |
+    | model        | Click Element `|` model=model_name              | Matches by AngularJS model name                    |
     | default*     | Click Link    `|` default=page?a=b              | Matches key attributes with value after first '='  |
 
     * Explicitly specifying the default strategy is only necessary if locating
@@ -161,15 +162,16 @@ class ExtendedSelenium2Library(Selenium2Library.Selenium2Library):
         | Library `|` ExtendedSelenium2Library `|` implicit_wait=5 `|` run_on_failure=Log Source | # Sets default implicit_wait to 5 seconds and runs `Log Source` on failure |
         | Library `|` ExtendedSelenium2Library `|` timeout=10      `|` run_on_failure=Nothing    | # Sets default timeout to 10 seconds and does nothing on failure           |
         """
-        Selenium2Library.Selenium2Library.__init__(self, timeout, implicit_wait, run_on_failure)
+        Selenium2Library.__init__(self, timeout, implicit_wait, run_on_failure)
         self._block_until_page_ready = block_until_page_ready
         self._browser_breath_delay = 0.05 if browser_breath_delay is None else float(browser_breath_delay)
+        self._element_finder = ExtendedElementFinder()
         self._ensure_jq = True if ensure_jq else False
         self._implicit_wait_in_secs = 15.0 if implicit_wait is None else float(implicit_wait)
         jquery_bootstrap = self.JQUERY_BOOTSTRAP % {'jquery_url': self.JQUERY_URL} if self._ensure_jq else ''
         self._page_ready_bootstrap = self.PAGE_READY_WRAPPER % {'jquery_bootstrap': jquery_bootstrap}
         self._poll_frequency = 0.2 if poll_frequency is None else float(poll_frequency)
-        #self._element_finder = ExtendedElementFinder()
+        self._table_element_finder._element_finder = self._element_finder
 
     def click_button(self, locator):
         """Clicks a button identified by `locator`.
@@ -462,7 +464,7 @@ class ExtendedSelenium2Library(Selenium2Library.Selenium2Library):
             # prevent double wait
             pass
         except:
-            self._debug(sys.exc_info()[0])
+            self._debug(exc_info()[0])
             # still inflight, second chance. let the browser take a deep breath...
             sleep(self._browser_breath_delay)
             try:
@@ -470,7 +472,7 @@ class ExtendedSelenium2Library(Selenium2Library.Selenium2Library):
                     until(lambda driver: driver.execute_async_script(js), error)
             except:
                 # instead of halting the process because AngularJS is not ready in <TIMEOUT>, we try our luck...
-                self._debug(sys.exc_info()[0])
+                self._debug(exc_info()[0])
                 pass
             finally:
                 browser.set_script_timeout(self._timeout_in_secs)
@@ -600,7 +602,7 @@ class ExtendedSelenium2Library(Selenium2Library.Selenium2Library):
         try:
             return self._current_browser().execute_script(js)
         except:
-            self._debug(sys.exc_info()[0])
+            self._debug(exc_info()[0])
             return False
 
     def _is_firefox(self, browser_name=None):
@@ -644,12 +646,12 @@ class ExtendedSelenium2Library(Selenium2Library.Selenium2Library):
                     until_not(staleness_of(browser.find_element_by_tag_name('body')), '')
             except:
                 # instead of halting the process because document is not ready in <TIMEOUT>, we try our luck...
-                self._debug(sys.exc_info()[0])
+                self._debug(exc_info()[0])
                 pass
             try:
                 WebDriverWait(browser, timeout, self._poll_frequency).\
                     until(lambda driver: driver.execute_async_script(self._page_ready_bootstrap), '')
             except:
                 # instead of halting the process because document is not ready in <TIMEOUT>, we try our luck...
-                self._debug(sys.exc_info()[0])
+                self._debug(exc_info()[0])
                 pass
