@@ -9,7 +9,8 @@ that uses the `Selenium 2 (WebDriver)`_ libraries from the Selenium_ project,
 to control the web browser with additional AngularJS_ support.
 
 It leverages Selenium2Library_ internally to provide AngularJS_ synchronization support,
-deliver keywords enhancement, and strive for a seamless migration from Selenium2Library_.
+AngularJS_ locators support, deliver keywords enhancement,
+and strive for a seamless migration from Selenium2Library_.
 
 More information about this library can be found in the `Keyword Documentation`_.
 
@@ -40,9 +41,9 @@ a specific version or upgrade only the Selenium tool used by the library:
 
 .. code:: bash
 
-    pip install robotframework-extendedselenium2library==0.4.8
+    pip install robotframework-extendedselenium2library==x.x.x
     pip install --upgrade selenium
-    pip install selenium==2.46
+    pip install selenium==x.xx
 
 Proxy configuration
 '''''''''''''''''''
@@ -90,7 +91,7 @@ and its dependencies yourself.
 
 .. code:: bash
 
-    gpg --verify robotframework-extendedselenium2library-0.4.8.tar.gz.asc robotframework-extendedselenium2library-0.4.8.tar.gz
+    gpg --verify robotframework-extendedselenium2library-x.x.x.tar.gz.asc robotframework-extendedselenium2library-x.x.x.tar.gz
 
 - Extract each source distribution to a temporary location.
 
