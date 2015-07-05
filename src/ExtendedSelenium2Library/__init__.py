@@ -34,7 +34,12 @@ class ExtendedSelenium2Library(Selenium2Library):
     """ExtendedSelenium2Library is a web testing library with AngularJS support and
     custom improvement for Robot Framework.
 
-    It uses the Selenium 2 (WebDriver) libraries internally to control a web browser.
+    ExtendedSelenium2Library strives to make the transition from Selenium2Library as seamless as possible.
+    It uses Selenium 2 (WebDriver) libraries and AngularJS synchronization internally
+    to control a web browser and ensure all the keywords stay in sync with AngularJS process.
+ 
+    See `Wait Until Angular Ready` keyword for a list of all other keywords that is already
+    calling `Wait Until Angular Ready` from within.
     See http://seleniumhq.org/docs/03_webdriver.html for more information on Selenium 2
     and WebDriver.
 
@@ -61,20 +66,22 @@ class ExtendedSelenium2Library(Selenium2Library):
     to find an element by specifying a lookup strategy with a locator
     prefix. Supported strategies are:
 
-    | *Strategy*   | *Example*                                       | *Description*                                      |
-    | identifier   | Click Element `|` identifier=my_element         | Matches by @id or @name attribute                  |
-    | id           | Click Element `|` id=my_element                 | Matches by @id attribute                           |
-    | name         | Click Element `|` name=my_element               | Matches by @name attribute                         |
-    | xpath        | Click Element `|` xpath=//div[@id='my_element'] | Matches with arbitrary XPath expression            |
-    | dom          | Click Element `|` dom=document.images[56]       | Matches with arbitrary DOM express                 |
-    | link         | Click Element `|` link=My Link                  | Matches anchor elements by their link text         |
-    | partial link | Click Element `|` partial link=y Lin            | Matches anchor elements by their partial link text |
-    | css          | Click Element `|` css=div.my_class              | Matches by CSS selector                            |
-    | jquery       | Click Element `|` jquery=div.my_class           | Matches by jQuery/sizzle selector                  |
-    | sizzle       | Click Element `|` sizzle=div.my_class           | Matches by jQuery/sizzle selector                  |
-    | tag          | Click Element `|` tag=div                       | Matches by HTML tag name                           |
-    | model        | Click Element `|` model=model_name              | Matches by AngularJS model name                    |
-    | default*     | Click Link    `|` default=page?a=b              | Matches key attributes with value after first '='  |
+    | *Strategy*      | *Example*                                       | *Description*                                      |
+    | identifier      | Click Element `|` identifier=my_element         | Matches by @id or @name attribute                  |
+    | id              | Click Element `|` id=my_element                 | Matches by @id attribute                           |
+    | name            | Click Element `|` name=my_element               | Matches by @name attribute                         |
+    | xpath           | Click Element `|` xpath=//div[@id='my_element'] | Matches with arbitrary XPath expression            |
+    | dom             | Click Element `|` dom=document.images[56]       | Matches with arbitrary DOM express                 |
+    | link            | Click Element `|` link=My Link                  | Matches anchor elements by their link text         |
+    | partial link    | Click Element `|` partial link=y Lin            | Matches anchor elements by their partial link text |
+    | css             | Click Element `|` css=div.my_class              | Matches by CSS selector                            |
+    | jquery          | Click Element `|` jquery=div.my_class           | Matches by jQuery/sizzle selector                  |
+    | sizzle          | Click Element `|` sizzle=div.my_class           | Matches by jQuery/sizzle selector                  |
+    | tag             | Click Element `|` tag=div                       | Matches by HTML tag name                           |
+    | model           | Click Element `|` model=model_name              | Matches by AngularJS model name                    |
+    | binding         | Click Element `|` binding=binding_name          | Matches by AngularJS binding name                  |
+    | partial binding | Click Element `|` partial binding=binding_name  | Matches by partial AngularJS binding name          |
+    | default*        | Click Link    `|` default=page?a=b              | Matches key attributes with value after first '='  |
 
     * Explicitly specifying the default strategy is only necessary if locating
     elements by matching key attributes is desired and an attribute value
@@ -438,6 +445,26 @@ class ExtendedSelenium2Library(Selenium2Library):
 
     def wait_until_angular_ready(self, timeout=None, error=None):
         """Waits until AngularJS is ready to process next request or `timeout` expires.
+
+        You do not need to call this keyword directly, below is the list of keywords which already call this keyword:
+
+        | Click Button                 |
+        | Click Element                |
+        | Click Element At Coordinates |
+        | Click Image                  |
+        | Click Link                   |
+        | Double Click Element         |
+        | Input Password               |
+        | Input Text                   |
+        | Open Browser                 |
+        | Select All From List         |
+        | Select Checkbox              |
+        | Select From List             |
+        | Select From List By Index    |
+        | Select From List By Label    |
+        | Select From List By Value    |
+        | Select Radio Button          |
+        | Submit Form                  |
 
         `error` can be used to override the default error message.
 
