@@ -80,12 +80,13 @@ class ExtendedSelenium2Library(Selenium2Library):
     | tag             | Click Element `|` tag=div                       | Matches by HTML tag name                           |
     | default*        | Click Link    `|` default=page?a=b              | Matches key attributes with value after first '='  |
 
-    | *AngularJS Strategy* | *Example*                                       | *Description*                                        |
-    | model                | Click Element `|` model=model_name              | Matches by AngularJS model name                      |
-    | binding              | Click Element `|` binding=binding_name          | Matches by AngularJS binding name                    |
-    | partial binding      | Click Element `|` partial binding=binding_name  | Matches by partial AngularJS binding name            |
-    | button               | Click Element `|` button=My Button              | Matches button elements by their button text         |
-    | partial button       | Click Element `|` partial button=y But          | Matches button elements by their partial button text |
+    | *AngularJS Strategy* | *Example*                                         | *Description*                                        |
+    | model                | Click Element   `|` model=model_name              | Matches by AngularJS model name                      |
+    | binding              | Click Element   `|` binding=binding_name          | Matches by AngularJS binding name                    |
+    | partial binding      | Click Element   `|` partial binding=binding_name  | Matches by partial AngularJS binding name            |
+    | button               | Click Element   `|` button=My Button              | Matches button elements by their button text         |
+    | partial button       | Click Element   `|` partial button=y But          | Matches button elements by their partial button text |
+    | options              | Get WebElements `|` options=options_descriptor    | Matches by AngularJS options descriptor              |
 
     * Explicitly specifying the default strategy is only necessary if locating
     elements by matching key attributes is desired and an attribute value

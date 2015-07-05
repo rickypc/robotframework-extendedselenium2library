@@ -38,6 +38,7 @@ class ExtendedElementFinder(ElementFinder):
             'binding': self._find_by_ng_binding,
             'button': self._find_by_button_text,
             'model': self._find_by_ng_model,
+            'options': self._find_by_ng_options,
             'partial binding': self._find_by_ng_binding_partial,
             'partial button': self._find_by_button_text_partial
         }
@@ -68,4 +69,10 @@ class ExtendedElementFinder(ElementFinder):
         stem = 'model="%s"' % model_name
         joiner = '%s],[' % stem
         criteria = '[' + joiner.join(self._ng_prefixes) + stem + ']'
+        return self._find_by_css_selector(browser, criteria, tag, constraints)
+
+    def _find_by_ng_options(self, browser, descriptor, tag, constraints):
+        stem = 'options="%s"' % descriptor
+        joiner = '%s] option,[' % stem
+        criteria = '[' + joiner.join(self._ng_prefixes) + stem + '] option'
         return self._find_by_css_selector(browser, criteria, tag, constraints)
