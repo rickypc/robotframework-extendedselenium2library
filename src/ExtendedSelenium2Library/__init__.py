@@ -78,10 +78,14 @@ class ExtendedSelenium2Library(Selenium2Library):
     | jquery          | Click Element `|` jquery=div.my_class           | Matches by jQuery/sizzle selector                  |
     | sizzle          | Click Element `|` sizzle=div.my_class           | Matches by jQuery/sizzle selector                  |
     | tag             | Click Element `|` tag=div                       | Matches by HTML tag name                           |
-    | model           | Click Element `|` model=model_name              | Matches by AngularJS model name                    |
-    | binding         | Click Element `|` binding=binding_name          | Matches by AngularJS binding name                  |
-    | partial binding | Click Element `|` partial binding=binding_name  | Matches by partial AngularJS binding name          |
     | default*        | Click Link    `|` default=page?a=b              | Matches key attributes with value after first '='  |
+
+    | *AngularJS Strategy* | *Example*                                       | *Description*                                        |
+    | model                | Click Element `|` model=model_name              | Matches by AngularJS model name                      |
+    | binding              | Click Element `|` binding=binding_name          | Matches by AngularJS binding name                    |
+    | partial binding      | Click Element `|` partial binding=binding_name  | Matches by partial AngularJS binding name            |
+    | button               | Click Element `|` button=My Button              | Matches button elements by their button text         |
+    | partial button       | Click Element `|` partial button=y But          | Matches button elements by their partial button text |
 
     * Explicitly specifying the default strategy is only necessary if locating
     elements by matching key attributes is desired and an attribute value
