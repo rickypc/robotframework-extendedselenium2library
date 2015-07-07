@@ -46,39 +46,7 @@ class ExtendedSelenium2Library(Selenium2Library):
     ExtendedSelenium2Library runs tests in a real browser instance. It should work in
     most modern browsers and can be used with both Python and Jython interpreters.
 
-    = Before running tests =
-
-    Prior to running test cases using ExtendedSelenium2Library, ExtendedSelenium2Library must be
-    imported into your Robot test suite (see `importing` section), and the
-    `Open Browser` keyword must be used to open a browser to the desired location.
-
-    = Locating elements =
-
-    All keywords in ExtendedSelenium2Library that need to find an element on the page
-    take an argument, `locator`. By default, when a locator value is provided,
-    it is matched against the key attributes of the particular element type.
-    For example, `id` and `name` are key attributes to all elements, and
-    locating elements is easy using just the `id` as a `locator`. For example::
-
-    Click Element  my_element
-
-    It is also possible to specify the approach ExtendedSelenium2Library should take
-    to find an element by specifying a lookup strategy with a locator
-    prefix. Supported strategies are:
-
-    | *Strategy*      | *Example*                                       | *Description*                                      |
-    | identifier      | Click Element `|` identifier=my_element         | Matches by @id or @name attribute                  |
-    | id              | Click Element `|` id=my_element                 | Matches by @id attribute                           |
-    | name            | Click Element `|` name=my_element               | Matches by @name attribute                         |
-    | xpath           | Click Element `|` xpath=//div[@id='my_element'] | Matches with arbitrary XPath expression            |
-    | dom             | Click Element `|` dom=document.images[56]       | Matches with arbitrary DOM express                 |
-    | link            | Click Element `|` link=My Link                  | Matches anchor elements by their link text         |
-    | partial link    | Click Element `|` partial link=y Lin            | Matches anchor elements by their partial link text |
-    | css             | Click Element `|` css=div.my_class              | Matches by CSS selector                            |
-    | jquery          | Click Element `|` jquery=div.my_class           | Matches by jQuery/sizzle selector                  |
-    | sizzle          | Click Element `|` sizzle=div.my_class           | Matches by jQuery/sizzle selector                  |
-    | tag             | Click Element `|` tag=div                       | Matches by HTML tag name                           |
-    | default*        | Click Link    `|` default=page?a=b              | Matches key attributes with value after first '='  |
+    = AngularJS Locators Support =
 
     | *AngularJS Strategy* | *Example*                                         | *Description*                                        |
     | model                | Click Element   `|` model=model_name              | Matches by AngularJS model name                      |
@@ -88,39 +56,17 @@ class ExtendedSelenium2Library(Selenium2Library):
     | partial button       | Click Element   `|` partial button=y But          | Matches button elements by their partial button text |
     | options              | Get WebElements `|` options=options_descriptor    | Matches by AngularJS options descriptor              |
 
-    * Explicitly specifying the default strategy is only necessary if locating
-    elements by matching key attributes is desired and an attribute value
-    contains a '='. The following would fail because it appears as if _page?a_
-    is the specified lookup strategy:
-    | Click Link    page?a=b
-    This can be fixed by changing the locator to:
-    | Click Link    default=page?a=b
+    = Before running tests =
 
-    Table related keywords, such as `Table Should Contain`, work differently.
-    By default, when a table locator value is provided, it will search for
-    a table with the specified `id` attribute. For example:
-
-    Table Should Contain  my_table  text
-
-    More complex table lookup strategies are also supported:
-
-    | *Strategy* | *Example*                                                          | *Description*                     |
-    | css        | Table Should Contain `|` css=table.my_class `|` text               | Matches by @id or @name attribute |
-    | xpath      | Table Should Contain `|` xpath=//table/[@name="my_table"] `|` text | Matches by @id or @name attribute |
-
-    = Timeouts =
-
-    There are several `Wait ...` keywords that take timeout as an
-    argument. All of these timeout arguments are optional. The timeout
-    used by all of them can be set globally using the
-    `Set Selenium Timeout` keyword. The same timeout also applies to
-    `Execute Async Javascript`.
-
-    All timeouts can be given as numbers considered seconds (e.g. 0.5 or 42)
-    or in Robot Framework's time syntax (e.g. '1.5 seconds' or '1 min 30 s').
-    For more information about the time syntax see:
-    http://robotframework.googlecode.com/svn/trunk/doc/userguide/RobotFrameworkUserGuide.html#time-format.
+    Prior to running test cases using ExtendedSelenium2Library, ExtendedSelenium2Library must be
+    imported into your Robot test suite (see `importing` section), and the
+    `Open Browser` keyword must be used to open a browser to the desired location.
     """
+
+    # let's not confuse people with different name and version
+    __doc__ = __doc__ + Selenium2Library.__doc__.split('desired location.', 1)[-1]. \
+        replace('Selenium2Library', 'ExtendedSelenium2Library').replace('version 1.7', 'version 0.5.3'). \
+        replace('Version 1.7.0', 'version 0.5.3')
 
     JQUERY_URL = '//code.jquery.com/jquery-1.11.3.min.js'
     JQUERY_BOOTSTRAP = 'var a=document.getElementsByTagName(\'head\')[0];var b=document.createElement(\'script\');' \
