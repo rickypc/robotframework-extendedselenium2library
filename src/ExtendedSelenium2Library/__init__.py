@@ -46,6 +46,19 @@ class ExtendedSelenium2Library(Selenium2Library):
     ExtendedSelenium2Library runs tests in a real browser instance. It should work in
     most modern browsers and can be used with both Python and Jython interpreters.
 
+    = Non-inherited Keywords =
+
+    | `Element Attribute Should Contain`     |
+    | `Element Attribute Should Not Contain` |
+    | `Wait For Async Condition`             |
+    | `Wait Until Angular Ready`             |
+    | `Wait Until Location Contains`         |
+    | `Wait Until Location Does Not Contain` |
+
+    = AngularJS Locators Support =
+
+    Coming Soon...
+
     = Before running tests =
 
     Prior to running test cases using ExtendedSelenium2Library, ExtendedSelenium2Library must be
@@ -188,10 +201,41 @@ class ExtendedSelenium2Library(Selenium2Library):
         self._wait_until_page_ready()
         self.wait_until_angular_ready()
 
+    def element_attribute_should_contain(self, attribute_locator, expected, message=''):
+        """Verifies element attribute identified by `attribute_locator` contains `expected`.
+
+        `attribute_locator` consists of element locator followed by an @ sign and attribute name, for example "element_id@class".
+
+        `message` can be used to override the default error message.
+        """
+        actual = self.get_element_attribute(attribute_locator)
+        if not expected in actual:
+            if not message:
+                message = "Element attribute '%s' should have contained '%s'" \
+                          " but its value was '%s'." % (attribute_locator, expected, actual)
+            raise AssertionError(message)
+
+    def element_attribute_should_not_contain(self, attribute_locator, expected, message=''):
+        """Verifies element attribute identified by `attribute_locator` does not contain `expected`.
+
+        `attribute_locator` consists of element locator followed by an @ sign and attribute name, for example "element_id@class".
+
+        `message` can be used to override the default error message.
+        """
+        actual = self.get_element_attribute(attribute_locator)
+        if expected in actual:
+            if not message:
+                message = "Element attribute '%s' should not contain '%s'" \
+                          " but it did." % (attribute_locator, expected)
+            raise AssertionError(message)
+
     def get_location(self):
         """Returns the current location."""
-        # cross browser support
-        return self._current_browser().execute_script('return document.location.href')
+        # AngularJS support
+        js = self.NG_WRAPPER % {'prefix': 'var cb=arguments[arguments.length-1];if(window.angular){',
+                                'handler': 'function(){cb(document.location.href)}',
+                                'suffix': '}else{cb(document.location.href)}'}
+        return self._current_browser().execute_async_script(js)
 
     def is_element_visible(self, locator):
         """Returns element visibility identified by `locator`.
@@ -385,23 +429,23 @@ class ExtendedSelenium2Library(Selenium2Library):
 
         You do not need to call this keyword directly, below is the list of keywords which already call this keyword:
 
-        | Click Button                 |
-        | Click Element                |
-        | Click Element At Coordinates |
-        | Click Image                  |
-        | Click Link                   |
-        | Double Click Element         |
-        | Input Password               |
-        | Input Text                   |
-        | Open Browser                 |
-        | Select All From List         |
-        | Select Checkbox              |
-        | Select From List             |
-        | Select From List By Index    |
-        | Select From List By Label    |
-        | Select From List By Value    |
-        | Select Radio Button          |
-        | Submit Form                  |
+        | `Click Button`                 |
+        | `Click Element`                |
+        | `Click Element At Coordinates` |
+        | `Click Image`                  |
+        | `Click Link`                   |
+        | `Double Click Element`         |
+        | `Input Password`               |
+        | `Input Text`                   |
+        | `Open Browser`                 |
+        | `Select All From List`         |
+        | `Select Checkbox`              |
+        | `Select From List`             |
+        | `Select From List By Index`    |
+        | `Select From List By Label`    |
+        | `Select From List By Value`    |
+        | `Select Radio Button`          |
+        | `Submit Form`                  |
 
         `error` can be used to override the default error message.
 
@@ -485,6 +529,46 @@ class ExtendedSelenium2Library(Selenium2Library):
             raise AssertionError("Element '%s' not found." % locator)
         WebDriverWait(None, timeout, self._poll_frequency).until(visibility_of(element), error)
 
+    def wait_until_location_contains(self, expected, timeout=None, error=None):
+        """Waits until current URL contains `expected`.
+
+        Fails if `timeout` expires before the expected URL presents on the page. See
+        `introduction` for more information about `timeout` and its
+        default value.
+
+        `error` can be used to override the default error message.
+
+        See also `Wait Until Location Does Not Contain`, `Wait Until Page Contains`,
+        `Wait Until Page Contains Element`, `Wait For Condition`,
+        `Wait Until Element Is Visible` and BuiltIn keyword `Wait Until Keyword Succeeds`.
+        """
+        timeout = self._timeout_in_secs if timeout is None else utils.timestr_to_secs(timeout)
+        if not error:
+            error = "Location did not contain '%s' after %s" %\
+                    (expected, self._format_timeout(timeout))
+        WebDriverWait(self, timeout, self._poll_frequency).\
+            until(lambda driver: expected in driver.get_location(), error)
+
+    def wait_until_location_does_not_contain(self, expected, timeout=None, error=None):
+        """Waits until current URL does not contain `expected`.
+
+        Fails if `timeout` expires before the expected URL goes away from the page. See
+        `introduction` for more information about `timeout` and its
+        default value.
+
+        `error` can be used to override the default error message.
+
+        See also `Wait Until Location Contains`, `Wait Until Page Contains`,
+        `Wait Until Page Contains Element`, `Wait For Condition`,
+        `Wait Until Element Is Visible` and BuiltIn keyword `Wait Until Keyword Succeeds`.
+        """
+        timeout = self._timeout_in_secs if timeout is None else utils.timestr_to_secs(timeout)
+        if not error:
+            error = "Location was still contain '%s' after %s" %\
+                    (expected, self._format_timeout(timeout))
+        WebDriverWait(self, timeout, self._poll_frequency).\
+            until_not(lambda driver: expected in driver.get_location(), error)
+
     def _angular_select_checkbox_or_radio_button(self, element):
         if element is None:
             raise AssertionError("Element not found.")
@@ -524,7 +608,6 @@ class ExtendedSelenium2Library(Selenium2Library):
 
     def _is_angular_control(self, element):
         if self._is_angular_page():
-            self._debug('Validating Angular control: %s' % element.get_attribute('outerHTML'))
             return element.get_attribute('data-ng-model') != '' or element.get_attribute('ng-model') != ''
         else:
             return False

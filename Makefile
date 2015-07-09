@@ -39,9 +39,11 @@ documentation_on_github:clean
 	git checkout master	
 
 testpypi_upload:documentation
+	python setup.py register -r test
 	python setup.py sdist upload -r test --sign
 	@echo https://testpypi.python.org/pypi/robotframework-extendedselenium2library/
 
 pypi_upload:documentation
+	python setup.py register -r pypi
 	python setup.py sdist upload -r pypi --sign
 	@echo https://pypi.python.org/pypi/robotframework-extendedselenium2library/
