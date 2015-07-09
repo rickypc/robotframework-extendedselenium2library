@@ -37,7 +37,7 @@ class ExtendedSelenium2Library(Selenium2Library):
     ExtendedSelenium2Library strives to make the transition from Selenium2Library as seamless as possible.
     It uses Selenium 2 (WebDriver) libraries and AngularJS synchronization internally
     to control a web browser and ensure all the keywords stay in sync with AngularJS process.
- 
+
     See `Wait Until Angular Ready` keyword for a list of all other keywords that is already
     calling `Wait Until Angular Ready` from within.
     See http://seleniumhq.org/docs/03_webdriver.html for more information on Selenium 2
@@ -64,9 +64,9 @@ class ExtendedSelenium2Library(Selenium2Library):
     """
 
     # let's not confuse people with different name and version
-    __doc__ = __doc__ + Selenium2Library.__doc__.split('desired location.', 1)[-1]. \
-        replace('Selenium2Library', 'ExtendedSelenium2Library').replace('version 1.7', 'version 0.5.3'). \
-        replace('Version 1.7.0', 'version 0.5.3')
+    __doc__ += Selenium2Library.__doc__.split('desired location.', 1)[-1]. \
+        replace('Selenium2Library', 'ExtendedSelenium2Library').replace('version 1.7', 'version 0.4.9'). \
+        replace('Version 1.7.0', 'version 0.4.9')
 
     JQUERY_URL = '//code.jquery.com/jquery-1.11.3.min.js'
     JQUERY_BOOTSTRAP = 'var a=document.getElementsByTagName(\'head\')[0];var b=document.createElement(\'script\');' \
@@ -199,6 +199,11 @@ class ExtendedSelenium2Library(Selenium2Library):
         self._wait_until_page_ready()
         self.wait_until_angular_ready()
 
+    def get_location(self):
+        """Returns the current location."""
+        # cross browser support
+        return self._current_browser().execute_script('return document.location.href')
+
     def is_element_visible(self, locator):
         """Returns element visibility identified by `locator`.
 
@@ -206,14 +211,6 @@ class ExtendedSelenium2Library(Selenium2Library):
         `introduction` for details about locating elements.
         """
         return self._is_visible(locator)
-
-    def location_should_be(self, url):
-        """Verifies that current URL is exactly `url`."""
-        # cross browser support
-        actual = self._current_browser().execute_script('return document.location.href')
-        if  actual != url:
-            raise AssertionError("Location should have been '%s' but was '%s'." % (url, actual))
-        self._debug("Current location is '%s'." % url)
 
     def open_browser(self, url, browser='firefox', alias=None,remote_url=False,
                      desired_capabilities=None,ff_profile_dir=None):
@@ -507,7 +504,6 @@ class ExtendedSelenium2Library(Selenium2Library):
                                 'handler': 'function(){angular.element(obj).prop(\'checked\',true).'
                                 'triggerHandler(\'click\')}',
                                 'suffix': ''}
-        self._debug("Executing JavaScript:\n%s" % js)
         self._current_browser().execute_script(js, element)
         self._wait_until_page_ready()
         self.wait_until_angular_ready()
@@ -519,9 +515,8 @@ class ExtendedSelenium2Library(Selenium2Library):
         if self._is_angular_control(element):
             # you will operating in different scope
             js = self.NG_WRAPPER % {'prefix': 'var obj=arguments[0];',
-                                    'handler': 'function(){angular.element(obj).triggerHandler(\'change\')}',
+                                    'handler': 'function(){$(obj).trigger(\'change\').trigger(\'focusout\')}',
                                     'suffix': ''}
-            self._debug("Executing JavaScript:\n%s" % js)
             self._current_browser().execute_script(js, element)
             self._wait_until_page_ready()
             self.wait_until_angular_ready()
@@ -532,40 +527,11 @@ class ExtendedSelenium2Library(Selenium2Library):
         return self._current_browser().capabilities['browserName'].strip().lower()
 
     def _input_text_into_text_field(self, locator, text):
+        super(ExtendedSelenium2Library, self)._input_text_into_text_field(locator, text)
         element = self._element_find(locator, True, True)
         if self._is_angular_control(element):
-            # you will operating in different scope
-            js = self.NG_WRAPPER % {'prefix': 'var obj=arguments[0];var text=arguments[1];',
-                                    'handler': 'function(){var el=angular.element(obj).val(text);' +
-                                               'el.triggerHandler(\'change\');el.triggerHandler(\'blur\')}',
-                                    'suffix': ''}
-            self._debug("Executing JavaScript:\n%s" % js)
-            self._current_browser().execute_script(js, element, text)
             self._wait_until_page_ready()
             self.wait_until_angular_ready()
-        else:
-            # *** run these into separate contexts to reduce race condition ***
-            browser_name = self._get_browser_name()
-            event = '' if self._is_firefox(browser_name) else 'event'
-            # focus window first, before focus to the requested field
-            js = ("try{window.focus();$(arguments[0]).trigger('focus',[%(event)s])}" +
-                 "catch(x){arguments[0].focus(%(event)s)}") % {'event': event}
-            self._debug("Executing JavaScript:\n%s" % js)
-            self._current_browser().execute_script(js, element)
-            if self._is_internet_explorer(browser_name):
-                # let the browser take a deep breath...
-                sleep(self._browser_breath_delay)
-            js = ("try{$(arguments[0]).val(arguments[1]).trigger('keyup',[%(event)s])}" +
-                 "catch(x){arguments[0].value=arguments[1]}") % {'event': event}
-            self._debug("Executing JavaScript:\n%s" % js)
-            self._current_browser().execute_script(js, element, text)
-            if self._is_internet_explorer(browser_name):
-                # let the browser take a deep breath...
-                sleep(self._browser_breath_delay)
-            # blur the window, will blur the field :)
-            js = "try{window.blur()}catch(x){arguments[0].onblur()}"
-            self._debug("Executing JavaScript:\n%s" % js)
-            self._current_browser().execute_script(js, element)
 
     def _is_angular_control(self, element):
         if self._is_angular_page():
@@ -576,17 +542,11 @@ class ExtendedSelenium2Library(Selenium2Library):
 
     def _is_angular_page(self):
         js = 'return !!window.angular'
-        self._debug("Executing JavaScript: %s" % js)
         try:
             return self._current_browser().execute_script(js)
         except:
             self._debug(exc_info()[0])
             return False
-
-    def _is_firefox(self, browser_name=None):
-        if not browser_name:
-            browser_name = self._get_browser_name()
-        return browser_name == 'firefox' or browser_name == 'ff'
 
     def _is_internet_explorer(self, browser_name=None):
         if not browser_name:
@@ -599,7 +559,6 @@ class ExtendedSelenium2Library(Selenium2Library):
             if element is None:
                 raise AssertionError("Element '%s' not found." % locator)
             js = 'arguments[0].scrollIntoView(false)'
-            self._debug("Executing JavaScript:\n%s" % js)
             self._current_browser().execute_script(js, element)
 
     def _select_checkbox_or_radio_button(self, element):

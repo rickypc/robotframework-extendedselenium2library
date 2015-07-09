@@ -6,11 +6,14 @@ Introduction
 
 ExtendedSelenium2Library is a web testing library for `Robot Framework`_
 that uses the `Selenium 2 (WebDriver)`_ libraries from the Selenium_ project,
-to control the web browser with additional AngularJS_ support.
+to control the web browser with AngularJS_ support.
 
 It leverages Selenium2Library_ internally to provide AngularJS_ synchronization support,
-AngularJS_ locators support, deliver keywords enhancement,
+to provide AngularJS_ locators support, to deliver keywords enhancement,
 and strive for a seamless migration from Selenium2Library_.
+
+ExtendedSelenium2Library runs tests in a real browser instance. It should work in
+most modern browsers and can be used with both Python and Jython interpreters.
 
 More information about this library can be found in the `Keyword Documentation`_.
 
@@ -137,6 +140,8 @@ License
 Copyright (c) 2015 Richard Huang.
 
 This library is free software, licensed under: `GNU Affero General Public License (AGPL-3.0) <http://www.gnu.org/licenses/agpl-3.0.en.html>`_.
+
+Documentation and other similar content are provided under `Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International License <http://creativecommons.org/licenses/by-nc-sa/4.0/>`_.
 
 .. _AngularJS: https://angularjs.org
 .. _Keyword Documentation: https://rickypc.github.io/robotframework-extendedselenium2library/doc/ExtendedSelenium2Library.html
