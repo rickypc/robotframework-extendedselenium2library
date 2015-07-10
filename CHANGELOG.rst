@@ -1,3 +1,12 @@
+0.4.10 (2015.07.09)
+==================
+
+* Fixes ``get_location`` to consider AngularJS synchronization, this is specially apparent on IE
+* Adds ``element_attribute_should_contain`` and ``element_attribute_should_not_contain`` keywords to support element attribute verification
+* Adds ``wait_until_location_contains`` and ``wait_until_location_does_not_contain`` to support current URL verification
+* Adds more documentation
+* Adds package registration as part of make task
+
 0.4.9 (2015.07.08)
 ==================
 
