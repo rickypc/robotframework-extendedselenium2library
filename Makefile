@@ -17,7 +17,7 @@
 .PHONY: help
 
 help:
-	@echo targets: clean, version, documentation, documentation_on_github, testpypi_upload, pypi_upload
+	@echo targets: clean, version, pylint, documentation, documentation_on_github, testpypi_upload, pypi_upload
 
 clean:
 	python setup.py clean --all
@@ -27,6 +27,9 @@ clean:
 
 version:
 	grep "VERSION = '*'" src/ExtendedSelenium2Library/version.py	
+
+pylint:
+	pylint --rcfile=.pylintrc src/ExtendedSelenium2Library/*.py
 
 documentation:clean
 	python -m robot.libdoc src/ExtendedSelenium2Library doc/ExtendedSelenium2Library.html
