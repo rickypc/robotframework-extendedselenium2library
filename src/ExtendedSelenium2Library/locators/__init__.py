@@ -17,7 +17,11 @@
 #    You should have received a copy of the GNU Affero General Public License
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-from extendedelementfinder import ExtendedElementFinder
+"""
+Extended Selenium2 Library - a web testing library with AngularJS support.
+"""
+
+from ExtendedSelenium2Library.locators.extendedelementfinder import ExtendedElementFinder
 
 __all__ = [
     "ExtendedElementFinder"

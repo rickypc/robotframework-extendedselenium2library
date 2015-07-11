@@ -21,8 +21,8 @@
 Extended Selenium2 Library - a web testing library with AngularJS support.
 """
 
+from ExtendedSelenium2Library.locators import ExtendedElementFinder
 from ExtendedSelenium2Library.version import get_version
-from locators import ExtendedElementFinder
 from robot import utils
 from selenium.common.exceptions import TimeoutException
 from selenium.webdriver.support.ui import WebDriverWait
@@ -34,7 +34,9 @@ from time import sleep, time
 __version__ = get_version()
 
 
+# pylint: disable=too-many-ancestors
 class ExtendedSelenium2Library(Selenium2Library):
+    # pylint: disable=line-too-long
     """ExtendedSelenium2Library is a web testing library with AngularJS support and
     custom improvement for Robot Framework.
 
@@ -76,6 +78,7 @@ class ExtendedSelenium2Library(Selenium2Library):
     imported into your Robot test suite (see `importing` section), and the
     `Open Browser` keyword must be used to open a browser to the desired location.
     """
+    # pylint: disable=line-too-long
 
     # let's not confuse people with different name and version
     __doc__ += Selenium2Library.__doc__.split('desired location.', 1)[-1]. \
@@ -155,7 +158,7 @@ class ExtendedSelenium2Library(Selenium2Library):
         self._page_ready_bootstrap = self.PAGE_READY_WRAPPER % \
             {'jquery_bootstrap': jquery_bootstrap}
         self._poll_frequency = 0.2 if poll_frequency is None else float(poll_frequency)
-        self._table_element_finder._element_finder = self._element_finder
+        self._table_element_finder._element_finder = self._element_finder # pylint: disable=protected-access
 
     def click_button(self, locator):
         """Clicks a button identified by `locator`.
@@ -274,6 +277,7 @@ class ExtendedSelenium2Library(Selenium2Library):
         """
         return self._is_visible(locator)
 
+    # pylint: disable=too-many-arguments
     def open_browser(self, url, browser='firefox', alias=None, remote_url=False,
                      desired_capabilities=None, ff_profile_dir=None):
         """Opens a new browser instance to given URL.

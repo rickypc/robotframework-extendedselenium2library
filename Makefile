@@ -29,7 +29,7 @@ version:
 	grep "VERSION = '*'" src/ExtendedSelenium2Library/version.py	
 
 pylint:
-	pylint --rcfile=.pylintrc src/ExtendedSelenium2Library/*.py
+	pylint --rcfile=.pylintrc src/ExtendedSelenium2Library/*.py src/ExtendedSelenium2Library/locators/*.py
 
 documentation:clean
 	python -m robot.libdoc src/ExtendedSelenium2Library doc/ExtendedSelenium2Library.html
