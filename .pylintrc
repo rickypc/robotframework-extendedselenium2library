@@ -1,0 +1,6 @@
+[BASIC]
+# Regular expression matching correct method names
+method-rgx=[a-z_][a-z0-9_]{2,40}$
+
+[MESSAGES CONTROL]
+disable=locally-disabled
