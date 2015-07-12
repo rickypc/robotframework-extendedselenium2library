@@ -45,7 +45,7 @@ a specific version or upgrade only the Selenium tool used by the library:
 
     pip install robotframework-extendedselenium2library==x.x.x
     pip install --upgrade selenium
-    pip install selenium==2.46
+    pip install selenium==x.xx
 
 Proxy configuration
 '''''''''''''''''''

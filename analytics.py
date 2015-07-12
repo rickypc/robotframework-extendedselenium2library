@@ -17,19 +17,25 @@
 #    You should have received a copy of the GNU Affero General Public License
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+"""
+Extended Selenium2 Library - a web testing library with AngularJS support.
+"""
+
+from __future__ import print_function
 from os.path import split
 from re import sub
-from sys import argv, exit
+import sys
 
 def main(argv):
+    """Adds analytics code into auto generated documentation."""
     try:
         path = argv[0]
     except:
-      print("analytics.py <file_path>")
-      exit(1)
+        print("analytics.py <file_path>")
+        sys.exit(1)
 
-    with open(path) as f:
-        content = f.read()
+    with open(path) as reader:
+        content = reader.read()
 
     analytics = """<script>
     (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
@@ -42,8 +48,8 @@ def main(argv):
 
     content = sub(r"</body>", analytics + "\n</body>", content)
 
-    with open(path, "w") as f:
-        f.write(content)
+    with open(path, "w") as writer:
+        writer.write(content)
 
 if __name__ == "__main__":
-    main(argv[1:])
+    main(sys.argv[1:])
