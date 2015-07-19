@@ -30,7 +30,7 @@ def main(argv):
     """Adds analytics code into auto generated documentation."""
     try:
         path = argv[0]
-    except:
+    except IndexError:
         print("analytics.py <file_path>")
         sys.exit(1)
 
