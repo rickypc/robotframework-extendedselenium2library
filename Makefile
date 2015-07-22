@@ -21,36 +21,37 @@ lc = $(subst A,a,$(subst B,b,$(subst C,c,$(subst D,d,$(subst E,e,$(subst F,f,$(s
 .PHONY: help
 
 help:
-	@echo targets: clean, version, pylint, documentation, documentation_on_github, testpypi_upload, pypi_upload
+	@echo targets: clean, version, lint, doc, github_doc, testpypi, pypi
 
 clean:
 	python setup.py clean --all
-	rm -rf src/*.egg-info
+	rm -rf .coverage htmlcov src/*.egg-info
 	find . -iname "*.pyc" -delete
 	find . -iname "__pycache__" | xargs rm -rf {} \;
 
 version:
 	grep "VERSION = '*'" src/$(LIBRARY_NAME)/version.py
 
-pylint:
-	pylint --rcfile=.pylintrc src/$(LIBRARY_NAME)/*.py
+lint:clean
+	flake8 --max-complexity 10
+	pylint --rcfile=setup.cfg src/$(LIBRARY_NAME)/*.py
 
-documentation:clean
+doc:clean
 	python -m robot.libdoc src/$(LIBRARY_NAME) doc/$(LIBRARY_NAME).html
 	python -m analytics doc/$(LIBRARY_NAME).html
 
-documentation_on_github:clean
+github_doc:clean
 	git checkout gh-pages
 	git merge master
 	git push origin gh-pages
 	git checkout master
 
-testpypi_upload:documentation
+testpypi:doc
 	python setup.py register -r test
 	python setup.py sdist upload -r test --sign
 	@echo https://testpypi.python.org/pypi/robotframework-$(call lc,$(LIBRARY_NAME))/
 
-pypi_upload:documentation
+pypi:doc
 	python setup.py register -r pypi
 	python setup.py sdist upload -r pypi --sign
 	@echo https://pypi.python.org/pypi/robotframework-$(call lc,$(LIBRARY_NAME))/

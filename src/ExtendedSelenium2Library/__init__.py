@@ -22,14 +22,14 @@ Extended Selenium2 Library - a web testing library with AngularJS support.
 """
 
 from ExtendedSelenium2Library.version import get_version
-#from locators import ExtendedElementFinder
+# from locators import ExtendedElementFinder
 from robot import utils
 from selenium.common.exceptions import TimeoutException
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support.expected_conditions import staleness_of, visibility_of
 from Selenium2Library import Selenium2Library
 from sys import exc_info
-from time import sleep, time
+from time import sleep
 
 __version__ = get_version()
 
@@ -148,7 +148,7 @@ class ExtendedSelenium2Library(Selenium2Library):
         self._page_ready_bootstrap = self.PAGE_READY_WRAPPER % \
             {'jquery_bootstrap': jquery_bootstrap}
         self._poll_frequency = 0.2 if poll_frequency is None else float(poll_frequency)
-        #self._element_finder = ExtendedElementFinder()
+        # self._element_finder = ExtendedElementFinder()
 
     def click_button(self, locator):
         """Clicks a button identified by `locator`.
@@ -228,7 +228,7 @@ class ExtendedSelenium2Library(Selenium2Library):
         `message` can be used to override the default error message.
         """
         actual = self.get_element_attribute(attribute_locator)
-        if not expected in actual:
+        if expected not in actual:
             if not message:
                 message = "Element attribute '%s' should have contained '%s'" \
                           " but its value was '%s'." % (attribute_locator, expected, actual)
@@ -253,7 +253,7 @@ class ExtendedSelenium2Library(Selenium2Library):
     def get_location(self):
         """Returns the current location."""
         # AngularJS support
-        script = self.NG_WRAPPER % {'prefix': 'var cb=arguments[arguments.length-1];' \
+        script = self.NG_WRAPPER % {'prefix': 'var cb=arguments[arguments.length-1];'
                                               'if(window.angular){',
                                     'handler': 'function(){cb(document.location.href)}',
                                     'suffix': '}else{cb(document.location.href)}'}
@@ -488,7 +488,7 @@ class ExtendedSelenium2Library(Selenium2Library):
         if not error:
             error = 'AngularJS is not ready in %s' % self._format_timeout(timeout)
         # we add more validation here to support transition between AngularJs to non AngularJS page.
-        script = self.NG_WRAPPER % {'prefix': 'var cb=arguments[arguments.length-1];' \
+        script = self.NG_WRAPPER % {'prefix': 'var cb=arguments[arguments.length-1];'
                                               'if(window.angular){',
                                     'handler': 'function(){cb(true)}',
                                     'suffix': '}else{cb(true)}'}
@@ -606,7 +606,7 @@ class ExtendedSelenium2Library(Selenium2Library):
             raise AssertionError("Element not found.")
         # you will operating in different scope
         script = self.NG_WRAPPER % {'prefix': 'var obj=arguments[0];',
-                                    'handler': 'function(){angular.element(obj).' \
+                                    'handler': 'function(){angular.element(obj).'
                                                'prop(\'checked\',true).triggerHandler(\'click\')}',
                                     'suffix': ''}
         self._current_browser().execute_script(script, element)
@@ -621,7 +621,7 @@ class ExtendedSelenium2Library(Selenium2Library):
         if self._is_angular_control(element):
             # you will operating in different scope
             script = self.NG_WRAPPER % {'prefix': 'var obj=arguments[0];',
-                                        'handler': 'function(){$(obj).trigger(\'change\').' \
+                                        'handler': 'function(){$(obj).trigger(\'change\').'
                                                    'trigger(\'focusout\')}',
                                         'suffix': ''}
             self._current_browser().execute_script(script, element)
@@ -702,8 +702,8 @@ class ExtendedSelenium2Library(Selenium2Library):
                 self._debug(exc_info()[0])
             try:
                 WebDriverWait(browser, timeout, self._poll_frequency).\
-                    until(lambda driver: driver. \
-                        execute_async_script(self._page_ready_bootstrap), '')
+                    until(lambda driver: driver.
+                          execute_async_script(self._page_ready_bootstrap), '')
             except:
                 # instead of halting the process because document is not ready
                 # in <TIMEOUT>, we try our luck...
