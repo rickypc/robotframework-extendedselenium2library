@@ -158,7 +158,7 @@ class ExtendedSelenium2Library(Selenium2Library):
         self._page_ready_bootstrap = self.PAGE_READY_WRAPPER % \
             {'jquery_bootstrap': jquery_bootstrap}
         self._poll_frequency = 0.2 if poll_frequency is None else float(poll_frequency)
-        self._table_element_finder._element_finder = self._element_finder # pylint: disable=protected-access
+        self._table_element_finder._element_finder = self._element_finder  # pylint: disable=protected-access
 
     def click_button(self, locator):
         """Clicks a button identified by `locator`.
