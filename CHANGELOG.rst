@@ -1,3 +1,9 @@
+0.4.11 (2015.07.22)
+===================
+
+* Fixes ``wait_for_async_condition`` typos
+* Follow flake8 and pylint recommendation
+
 0.4.10 (2015.07.09)
 ==================
 

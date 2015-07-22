@@ -26,6 +26,7 @@ from os.path import split
 from re import sub
 import sys
 
+
 def main(argv):
     """Adds analytics code into auto generated documentation."""
     try:
