@@ -35,8 +35,8 @@ __version__ = get_version()
 
 
 class ExtendedSelenium2Library(Selenium2Library):
-    """ExtendedSelenium2Library is a web testing library with AngularJS support and
-    custom improvement for Robot Framework.
+    """ExtendedSelenium2Library is a Selenium2 (WebDriver) web testing library
+    with AngularJS support and custom improvement for Robot Framework.
 
     ExtendedSelenium2Library strives to make the transition from Selenium2Library
     as seamless as possible.

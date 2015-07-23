@@ -21,13 +21,16 @@ lc = $(subst A,a,$(subst B,b,$(subst C,c,$(subst D,d,$(subst E,e,$(subst F,f,$(s
 .PHONY: help
 
 help:
-	@echo targets: clean, version, lint, doc, github_doc, testpypi, pypi
+	@echo targets: clean, clean_dist, version, lint, doc, github_doc, testpypi, pypi
 
 clean:
 	python setup.py clean --all
 	rm -rf .coverage htmlcov src/*.egg-info
 	find . -iname "*.pyc" -delete
 	find . -iname "__pycache__" | xargs rm -rf {} \;
+
+clean_dist:
+	rm -rf dist
 
 version:
 	grep "VERSION = '*'" src/$(LIBRARY_NAME)/version.py
@@ -46,12 +49,12 @@ github_doc:clean
 	git push origin gh-pages
 	git checkout master
 
-testpypi:doc
+testpypi:clean_dist doc
 	python setup.py register -r test
 	python setup.py sdist upload -r test --sign
 	@echo https://testpypi.python.org/pypi/robotframework-$(call lc,$(LIBRARY_NAME))/
 
-pypi:doc
+pypi:clean_dist doc
 	python setup.py register -r pypi
 	python setup.py sdist upload -r pypi --sign
 	@echo https://pypi.python.org/pypi/robotframework-$(call lc,$(LIBRARY_NAME))/

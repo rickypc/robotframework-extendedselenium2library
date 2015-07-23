@@ -1,3 +1,9 @@
+0.4.12 (2015.07.22)
+===================
+
+* Update documentation
+* selenium package hard requirement
+
 0.4.11 (2015.07.22)
 ===================
 
