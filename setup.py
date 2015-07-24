@@ -37,7 +37,8 @@ with codecs.open(join(CWD, 'README.rst'), encoding='utf-8') as reader:
 setup(
     name='robotframework-%s' % LIBRARY_NAME.lower(),
     version=VERSION,  # pylint: disable=undefined-variable  # noqa
-    description='Extended web testing library for Robot Framework with AngularJS support',
+    description='Extended Selenium2 web testing library for Robot Framework '
+                'with AngularJS support',
     long_description=LONG_DESCRIPTION,
     url='https://github.com/rickypc/robotframework-%s' % LIBRARY_NAME.lower(),
     author='Richard Huang',
@@ -55,5 +56,5 @@ setup(
     platforms='any',
     packages=find_packages('src'),
     package_dir={'': 'src'},
-    install_requires=['robotframework-selenium2library >= 1.7.0']
+    install_requires=['selenium >= 2.46.1', 'robotframework-selenium2library >= 1.7.2']
 )

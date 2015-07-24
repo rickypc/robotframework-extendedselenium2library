@@ -1,10 +1,10 @@
-Extended Selenium 2 (WebDriver) library for Robot Framework
-===========================================================
+Extended Selenium 2 (WebDriver) web testing library for Robot Framework
+=======================================================================
 
 Introduction
 ------------
 
-ExtendedSelenium2Library is a web testing library for `Robot Framework`_
+ExtendedSelenium2Library is web testing library for `Robot Framework`_
 that uses the `Selenium 2 (WebDriver)`_ libraries from the Selenium_ project,
 to control the web browser with AngularJS_ support.
 
@@ -132,7 +132,7 @@ The `Keyword Documentation`_ can be found online, if you need to generate the ke
 
 .. code:: bash
 
-    make documentation
+    make doc
 
 License
 -------
