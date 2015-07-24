@@ -21,9 +21,8 @@
 Extended Selenium2 Library - a web testing library with AngularJS support.
 """
 
-VERSION = '0.4.13'
+from ExtendedSelenium2Library.decorators.docstring import inherit_docs
 
-
-def get_version():
-    """Returns the current version."""
-    return VERSION
+__all__ = [
+    'inherit_docs'
+]

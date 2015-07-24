@@ -1,3 +1,10 @@
+0.4.13 (2015.07.24)
+===================
+
+* Adjust selenium and S2L requirements
+* Register the main window as the first window handle in the list during open browser
+* Use docstring decorator to inherit method docs from parent class
+
 0.4.12 (2015.07.22)
 ===================
 

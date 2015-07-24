@@ -33,11 +33,11 @@ clean_dist:
 	rm -rf dist
 
 version:
-	grep "VERSION = '*'" src/$(LIBRARY_NAME)/version.py
+	python -m robot.libdoc src/$(LIBRARY_NAME) version
 
 lint:clean
 	flake8 --max-complexity 10
-	pylint --rcfile=setup.cfg src/$(LIBRARY_NAME)/*.py
+	pylint --rcfile=setup.cfg src/$(LIBRARY_NAME)/*.py src/$(LIBRARY_NAME)/decorators/*.py
 
 doc:clean
 	python -m robot.libdoc src/$(LIBRARY_NAME) doc/$(LIBRARY_NAME).html

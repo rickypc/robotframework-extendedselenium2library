@@ -21,9 +21,14 @@
 Extended Selenium2 Library - a web testing library with AngularJS support.
 """
 
-VERSION = '0.4.13'
 
-
-def get_version():
-    """Returns the current version."""
-    return VERSION
+def inherit_docs(cls):
+    """Inherits method docstring from parent method."""
+    for name, func in vars(cls).items():
+        if not func.__doc__:
+            for parent in cls.__bases__:
+                parent_func = getattr(parent, name, None)
+                if parent_func and getattr(parent_func, '__doc__', None):
+                    func.__doc__ = parent_func.__doc__
+                    break
+    return cls
