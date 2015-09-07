@@ -47,7 +47,7 @@ class ExtendedElementFinder(ElementFinder):
             'partial button': self._find_by_button_text_partial
         }
         self._strategies.update(strategies)
-        self._default_strategies = self._strategies.keys()
+        self._default_strategies = list(self._strategies.keys())
         self._ng_prefixes = ['ng-', 'data-ng-', 'ng_', 'x-ng-', 'ng\\:']
 
     def _find_by_button_text(self, browser, button_text, tag, constraints):
