@@ -39,22 +39,19 @@ __version__ = get_version()
 @inherit_docs
 class ExtendedSelenium2Library(Selenium2Library):
     # pylint: disable=line-too-long
-    """ExtendedSelenium2Library is a
-    [http://seleniumhq.org/docs/03_webdriver.html|Selenium2 (WebDriver)] web testing library
-    with [https://angularjs.org|AngularJS] support and custom improvement for
-    [http://robotframework.org|Robot Framework].
+    """ExtendedSelenium2Library is a [http://goo.gl/boVQia|Selenium2 (WebDriver)]
+    web testing library with [https://goo.gl/Kzz8Y3|AngularJS] support and
+    custom improvement for [http://goo.gl/lES6WM|Robot Framework].
 
     ExtendedSelenium2Library strives to make the transition from
-    [https://github.com/rtomac/robotframework-selenium2library/wiki|Selenium2Library]
-    as seamless as possible.
-    It uses [http://seleniumhq.org/docs/03_webdriver.html|Selenium2 (WebDriver)] libraries
-    and [https://angularjs.org|AngularJS] synchronization internally to control a web browser
-    and ensure all the keywords stay in sync with [https://angularjs.org|AngularJS] process.
+    [https://goo.gl/1VXDSI|Selenium2Library] as seamless as possible.
+    It uses [http://goo.gl/boVQia|Selenium2 (WebDriver)] libraries
+    and [https://goo.gl/Kzz8Y3|AngularJS] synchronization internally to control a web browser
+    and ensure all the keywords stay in sync with [https://goo.gl/Kzz8Y3|AngularJS] process.
 
     See `Wait Until Angular Ready` keyword for a list of all other keywords that is already
     calling `Wait Until Angular Ready` from within.
-    See [http://seleniumhq.org/docs/03_webdriver.html|Selenium2 and WebDriver]
-    for more information.
+    See [http://goo.gl/boVQia|Selenium2 and WebDriver] for more information.
 
     ExtendedSelenium2Library runs tests in a real browser instance. It should work in
     most modern browsers and can be used with both Python and Jython interpreters.
@@ -115,32 +112,30 @@ class ExtendedSelenium2Library(Selenium2Library):
         # pylint: disable=line-too-long
         """ExtendedSelenium2Library can be imported with optional arguments.
 
-        `timeout` is the default timeout used to wait for all waiting actions.
-        It can be later set with `Set Selenium Timeout`.
-
-        'implicit_wait' is the implicit timeout that Selenium waits when
-        looking for elements.
-        It can be later set with `Set Selenium Implicit Wait`.
-        See `WebDriver: Advanced Usage`__ section of the SeleniumHQ documentation
-        for more information about WebDriver's implicit wait functionality.
-
-        __ http://seleniumhq.org/docs/04_webdriver_advanced.html#explicit-and-implicit-waits
-
-        `run_on_failure` specifies the name of a keyword (from any available
-        libraries) to execute when a ExtendedSelenium2Library keyword fails. By default
-        `Capture Page Screenshot` will be used to take a screenshot of the current page.
-        Using the value "Nothing" will disable this feature altogether. See
-        `Register Keyword To Run On Failure` keyword for more information about this
-        functionality.
-
-        `block_until_page_ready` if it's true, will block the execution until the page ready.
-
-        `browser_breath_delay` is the delay in seconds to give the browser enough time
-        to execute the next step.
-
-        `ensure_jq` if it's true, will ensure jQuery loaded on the page.
-
-        `poll_frequency` is the number in seconds to retry the next step.
+        Arguments:
+        - ``timeout``: The maximum value to wait for all waiting actions. (Default 90.0)
+                       It can be set later with `Set Selenium Timeout`.
+                       See `introduction` for more information about ``timeout``.
+        - ``implicit_wait``: The maximum implicit timeout value to wait when looking
+                             for elements. (Default 15.0)
+                             It can be later set with `Set Selenium Implicit Wait`.
+                             See [http://goo.gl/8ePMo6|WebDriver: Advanced Usage]
+                             section of the SeleniumHQ documentation for more information about
+                             WebDriver's implicit wait functionality.
+        - ``run_on_failure``: The name of a keyword (from any available libraries) to execute
+                              when a ExtendedSelenium2Library keyword fails. By default
+                              `Capture Page Screenshot` will be used to take a screenshot of
+                              the current page.
+                              Using the value "Nothing" will disable this feature altogether.
+                              See `Register Keyword To Run On Failure` keyword for
+                              more information about this functionality.
+        - ``block_until_page_ready``: A boolean flag to block the execution until
+                                      the page is ready. (Default True)
+        - ``browser_breath_delay``: The delay value in seconds to give the browser enough time to
+                                    complete current execution. (Default 0.05)
+        - ``ensure_jq``: A boolean flag to ensure jQuery library is loaded on the page.
+                         ``sizzle`` locator strategy will depend on this flag. (Default True)
+        - ``poll_frequency``: The delay value in seconds to retry the next step. (Default 0.2)
 
         Examples:
         | Library `|` ExtendedSelenium2Library `|` 15                                            | # Sets default timeout to 15 seconds                                       |
@@ -341,7 +336,7 @@ class ExtendedSelenium2Library(Selenium2Library):
             until(lambda driver: driver.execute_async_script(condition), error)
 
     def wait_until_angular_ready(self, timeout=None, error=None):
-        """Waits until [https://angularjs.org|AngularJS] is ready to process the next request or
+        """Waits until [https://goo.gl/Kzz8Y3|AngularJS] is ready to process the next request or
         ``timeout`` expires.
 
         You generally *do not* need to call this keyword directly,
@@ -366,7 +361,7 @@ class ExtendedSelenium2Library(Selenium2Library):
         | `Submit Form`                  |
 
         Arguments:
-        - ``timeout``: The maximum value to wait for [https://angularjs.org|AngularJS]
+        - ``timeout``: The maximum value to wait for [https://goo.gl/Kzz8Y3|AngularJS]
                        to be ready to process the next request.
                        See `introduction` for more information about ``timeout`` and
                        its default value.
