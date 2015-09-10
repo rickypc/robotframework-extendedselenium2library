@@ -23,7 +23,7 @@ Installation
 Using ``pip``
 '''''''''''''
 
-The recommended installation method is using `pip <http://pip-installer.org>`__:
+The recommended installation method is using pip_:
 
 .. code:: bash
 
@@ -54,8 +54,7 @@ Proxy configuration
 If you are behind a proxy, you can use ``--proxy`` command line option
 or set ``http_proxy`` and/or ``https_proxy`` environment variables to
 configure ``pip`` to use it. If you are behind an authenticating NTLM proxy,
-you may want to consider installing `CNTML <http://cntlm.sourceforge.net>`__
-to handle communicating with it.
+you may want to consider installing CNTML_ to handle communicating with it.
 
 For more information about ``--proxy`` option and using pip with proxies
 in general see:
@@ -71,7 +70,7 @@ If you do not have network connection or cannot make proxy to work, you need
 to resort to manual installation. This requires installing both the library
 and its dependencies yourself.
 
-- Make sure you have `Robot Framework installed <http://code.google.com/p/robotframework/wiki/Installation>`__.
+- Make sure you have `Robot Framework installed`_.
 
 - Download source distributions (``*.tar.gz``) for the library and its dependencies:
 
@@ -134,19 +133,47 @@ The `Keyword Documentation`_ can be found online, if you need to generate the ke
 
     make doc
 
+Usage
+-----
+
+To write tests with Robot Framework and ExtendedSelenium2Library,
+ExtendedSelenium2Library must be imported into your Robot test suite.
+See `Robot Framework User Guide`_ for more information.
+
+More information about Robot Framework standard libraries and built-in tools
+can be found in the `Robot Framework Documentation`_.
+
+Contributing
+------------
+
+If you would like to contribute code to Extended Selenium2 Library project you can do so through GitHub by forking the repository and sending a pull request.
+
+When submitting code, please make every effort to follow existing conventions and style in order to keep the code as readable as possible. Please also include appropriate test cases.
+
+Before your code can be accepted into the project you must also sign the `Extended Selenium2 Library CLA`_ (Individual Contributor License Agreement).
+
+That's it! Thank you for your contribution!
+
 License
 -------
 
 Copyright (c) 2015 Richard Huang.
 
-This library is free software, licensed under: `GNU Affero General Public License (AGPL-3.0) <http://www.gnu.org/licenses/agpl-3.0.en.html>`_.
+This library is free software, licensed under: `GNU Affero General Public License (AGPL-3.0)`_.
 
-Documentation and other similar content are provided under `Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International License <http://creativecommons.org/licenses/by-nc-sa/4.0/>`_.
+Documentation and other similar content are provided under `Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International License`_.
 
-.. _AngularJS: https://angularjs.org
+.. _AngularJS: https://goo.gl/Kzz8Y3
+.. _CNTML: http://cntlm.sourceforge.net
+.. _Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International License: http://creativecommons.org/licenses/by-nc-sa/4.0/
+.. _Extended Selenium2 Library CLA: https://goo.gl/forms/1pkl9YfWpA
+.. _GNU Affero General Public License (AGPL-3.0): http://www.gnu.org/licenses/agpl-3.0.en.html
 .. _Keyword Documentation: https://rickypc.github.io/robotframework-extendedselenium2library/doc/ExtendedSelenium2Library.html
-.. _Robot Framework: http://robotframework.org
+.. _pip: http://pip-installer.org
+.. _Robot Framework: http://goo.gl/lES6WM
+.. _Robot Framework Documentation: http://robotframework.org/robotframework/
+.. _Robot Framework installed: https://github.com/robotframework/robotframework#installation
+.. _Robot Framework User Guide: http://robotframework.org/robotframework/latest/RobotFrameworkUserGuide.html
 .. _Selenium: http://selenium.openqa.org
-.. _Selenium2Library: https://github.com/rtomac/robotframework-selenium2library/wiki
-.. _Selenium 2 (WebDriver): http://seleniumhq.org/docs/03_webdriver.html
-.. _Robot Framework User Guide: http://code.google.com/p/robotframework/wiki/UserGuide
+.. _Selenium2Library: https://goo.gl/1VXDSI
+.. _Selenium 2 (WebDriver): http://goo.gl/boVQia
