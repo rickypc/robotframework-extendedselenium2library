@@ -1,6 +1,8 @@
 Extended Selenium 2 (WebDriver) web testing library for Robot Framework
 =======================================================================
 
+|Docs| |Version| |Status| |Python| |Download| |License|
+
 Introduction
 ------------
 
@@ -164,16 +166,34 @@ This library is free software, licensed under: `GNU Affero General Public Licens
 Documentation and other similar content are provided under `Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International License`_.
 
 .. _AngularJS: https://goo.gl/Kzz8Y3
-.. _CNTML: http://cntlm.sourceforge.net
-.. _Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International License: http://creativecommons.org/licenses/by-nc-sa/4.0/
+.. _CNTML: http://goo.gl/ukiwSO
+.. _Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International License: http://goo.gl/SNw73V
 .. _Extended Selenium2 Library CLA: https://goo.gl/forms/1pkl9YfWpA
-.. _GNU Affero General Public License (AGPL-3.0): http://www.gnu.org/licenses/agpl-3.0.en.html
-.. _Keyword Documentation: https://rickypc.github.io/robotframework-extendedselenium2library/doc/ExtendedSelenium2Library.html
-.. _pip: http://pip-installer.org
+.. _GNU Affero General Public License (AGPL-3.0): http://goo.gl/LOMJeU
+.. _Keyword Documentation: https://goo.gl/9z5Xj9
+.. _pip: http://goo.gl/jlJCPE
 .. _Robot Framework: http://goo.gl/lES6WM
-.. _Robot Framework Documentation: http://robotframework.org/robotframework/
-.. _Robot Framework installed: https://github.com/robotframework/robotframework#installation
-.. _Robot Framework User Guide: http://robotframework.org/robotframework/latest/RobotFrameworkUserGuide.html
-.. _Selenium: http://selenium.openqa.org
+.. _Robot Framework Documentation: http://goo.gl/zy53tf
+.. _Robot Framework installed: https://goo.gl/PFbWqM
+.. _Robot Framework User Guide: http://goo.gl/Q7dfPB
+.. _Selenium: http://goo.gl/fbso3g
 .. _Selenium2Library: https://goo.gl/1VXDSI
 .. _Selenium 2 (WebDriver): http://goo.gl/boVQia
+.. |Docs| image:: https://img.shields.io/badge/docs-latest-brightgreen.svg
+    :target: https://goo.gl/9z5Xj9
+    :alt: Keyword Documentation
+.. |Version| image:: https://img.shields.io/pypi/v/robotframework-extendedselenium2library.svg
+    :target: https://goo.gl/wHr4ni
+    :alt: Package Version
+.. |Status| image:: https://img.shields.io/pypi/status/robotframework-extendedselenium2library.svg
+    :target: https://goo.gl/wHr4ni
+    :alt: Development Status
+.. |Python| image:: https://img.shields.io/pypi/pyversions/robotframework-extendedselenium2library.svg
+    :target: https://goo.gl/sXzgao
+    :alt: Python Version
+.. |Download| image:: https://img.shields.io/pypi/dm/robotframework-extendedselenium2library.svg
+    :target: https://goo.gl/wHr4ni
+    :alt: Monthly Download
+.. |License| image:: https://img.shields.io/pypi/l/robotframework-extendedselenium2library.svg
+    :target: http://goo.gl/LOMJeU
+    :alt: License
