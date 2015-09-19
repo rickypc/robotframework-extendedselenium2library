@@ -25,7 +25,8 @@ from Selenium2Library.locators import ElementFinder
 
 
 class ExtendedElementFinder(ElementFinder):
-    """ExtendedElementFinder is a web element finder with AngularJS locators support."""
+    """ExtendedElementFinder is a web element finder with
+    [https://goo.gl/00Q8qX|Protractor locators] support."""
 
     BUTTON_TEXT_WRAPPER = "return [].filter.call(document.querySelectorAll('button," \
                           "input[type=\"button\"],input[type=\"submit\"]')," \
