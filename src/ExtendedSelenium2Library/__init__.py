@@ -564,7 +564,7 @@ class ExtendedSelenium2Library(Selenium2Library):
         """Adds a keyword to be run at the end of the wait until page ready keyword """
         self._page_ready_keyword_list.append(keyword_name)
         
-    def remove_page_ready_strategy(self, keyword_name):
+    def remove_page_ready_keyword(self, keyword_name):
         """Removes a keyword to be run at the end of the wait until page ready keyword"""
         self._page_ready_keyword_list.remove(keyword_name)
         
