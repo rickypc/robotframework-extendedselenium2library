@@ -161,6 +161,7 @@ class ExtendedSelenium2Library(Selenium2Library):
         self._poll_frequency = 0.2 if poll_frequency is None else float(poll_frequency)
         self._table_element_finder._element_finder = self._element_finder  # pylint: disable=protected-access
         self._page_ready_keyword_list = []
+        self._builtin = BuiltIn()
 
     def click_button(self, locator):
         self._scroll_into_view(locator)
@@ -595,4 +596,4 @@ class ExtendedSelenium2Library(Selenium2Library):
                 # in <TIMEOUT>, we try our luck...
                 self._debug(exc_info()[0])
             for keyword in self._page_ready_keyword_list:
-                BuiltIn().run_keyword(keyword)
+                self._builtin.run_keyword(keyword)
