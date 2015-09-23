@@ -31,6 +31,7 @@ from selenium.webdriver.support.expected_conditions import staleness_of, visibil
 from Selenium2Library import Selenium2Library
 from sys import exc_info
 from time import sleep
+from robot.libraries.BuiltIn import BuiltIn
 
 __version__ = get_version()
 
@@ -159,6 +160,8 @@ class ExtendedSelenium2Library(Selenium2Library):
             {'jquery_bootstrap': jquery_bootstrap}
         self._poll_frequency = 0.2 if poll_frequency is None else float(poll_frequency)
         self._table_element_finder._element_finder = self._element_finder  # pylint: disable=protected-access
+        self._page_ready_keyword_list = []
+        self._builtin = BuiltIn()
 
     def click_button(self, locator):
         self._scroll_into_view(locator)
@@ -558,6 +561,14 @@ class ExtendedSelenium2Library(Selenium2Library):
             element.click()
             self._wait_until_page_ready()
 
+    def register_page_ready_keyword(self, keyword_name):
+        """Adds a keyword to be run at the end of the wait until page ready keyword """
+        self._page_ready_keyword_list.append(keyword_name)
+        
+    def remove_page_ready_keyword(self, keyword_name):
+        """Removes a keyword to be run at the end of the wait until page ready keyword"""
+        self._page_ready_keyword_list.remove(keyword_name)
+        
     def _wait_until_page_ready(self, timeout=None):
         """Semi blocking API that incorporated different strategies for cross-browser support."""
         if self._block_until_page_ready:
@@ -571,7 +582,7 @@ class ExtendedSelenium2Library(Selenium2Library):
             browser = self._current_browser()
             try:
                 WebDriverWait(None, timeout, self._poll_frequency).\
-                    until_not(staleness_of(browser.find_element_by_tag_name('body')), '')
+                    until_not(staleness_of(browser.find_element_by_tag_name('html')), '')
             except:
                 # instead of halting the process because document is not ready
                 # in <TIMEOUT>, we try our luck...
@@ -584,3 +595,5 @@ class ExtendedSelenium2Library(Selenium2Library):
                 # instead of halting the process because document is not ready
                 # in <TIMEOUT>, we try our luck...
                 self._debug(exc_info()[0])
+            for keyword in self._page_ready_keyword_list:
+                self._builtin.run_keyword(keyword)
