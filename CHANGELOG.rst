@@ -1,3 +1,15 @@
+0.5.5 (2015.09.22)
+==================
+
+* Add frames support
+* Add ``register_page_ready_keyword`` and ``remove_page_ready_keyword`` keywords
+* Bugfixes
+
+0.5.4 (2015.09.06)
+==================
+
+* Add Angular strategies support
+
 0.4.13 (2015.07.24)
 ===================
 

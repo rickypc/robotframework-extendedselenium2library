@@ -61,6 +61,8 @@ class ExtendedSelenium2Library(Selenium2Library):
     | `Element Attribute Should Contain`     |
     | `Element Attribute Should Not Contain` |
     | `Is Element Visible`                   |
+    | `Register Page Ready Keyword`          |
+    | `Remove Page Ready Keyword`            |
     | `Wait For Async Condition`             |
     | `Wait Until Angular Ready`             |
     | `Wait Until Location Contains`         |
@@ -235,10 +237,10 @@ class ExtendedSelenium2Library(Selenium2Library):
         | Element Attribute Should Not Contain | css=div.class@class | value |
         """
         actual = self.get_element_attribute(attribute_locator)
-        if expected in actual:
+        if unexpected in actual:
             if not message:
                 message = "Element attribute '%s' should not contain '%s'" \
-                          " but it did." % (attribute_locator, expected)
+                          " but it did." % (attribute_locator, unexpected)
             raise AssertionError(message)
 
     def get_location(self):
@@ -272,6 +274,28 @@ class ExtendedSelenium2Library(Selenium2Library):
         self._wait_until_page_ready()
         self.wait_until_angular_ready()
         return index
+
+    def register_page_ready_keyword(self, keyword_name):
+        """Adds a keyword to be run at the end of the wait until page ready keyword.
+
+        Arguments:
+        - ``keyword_name``: Adds existing keyword name to be run when the page is ready.
+
+        Examples:
+        | Register Page Ready Keyword | My Keyword |
+        """
+        self._page_ready_keyword_list.append(keyword_name)
+
+    def remove_page_ready_keyword(self, keyword_name):
+        """Removes a keyword to be run at the end of the wait until page ready keyword.
+
+        Arguments:
+        - ``keyword_name``: Removes existing keyword name from running when the page is ready.
+
+        Examples:
+        | Remove Page Ready Keyword | My Keyword |
+        """
+        self._page_ready_keyword_list.remove(keyword_name)
 
     def select_all_from_list(self, locator):
         super(ExtendedSelenium2Library, self).select_all_from_list(locator)
@@ -475,9 +499,9 @@ class ExtendedSelenium2Library(Selenium2Library):
         timeout = self._timeout_in_secs if timeout is None else utils.timestr_to_secs(timeout)
         if not error:
             error = "Location was still contain '%s' after %s" %\
-                    (expected, self._format_timeout(timeout))
+                    (unexpected, self._format_timeout(timeout))
         WebDriverWait(self, timeout, self._poll_frequency).\
-            until_not(lambda driver: expected in driver.get_location(), error)
+            until_not(lambda driver: unexpected in driver.get_location(), error)
 
     def _angular_select_checkbox_or_radio_button(self, element):
         """Select checkbox or radio button when AngularJS is ready."""
@@ -561,14 +585,6 @@ class ExtendedSelenium2Library(Selenium2Library):
             element.click()
             self._wait_until_page_ready()
 
-    def register_page_ready_keyword(self, keyword_name):
-        """Adds a keyword to be run at the end of the wait until page ready keyword """
-        self._page_ready_keyword_list.append(keyword_name)
-        
-    def remove_page_ready_keyword(self, keyword_name):
-        """Removes a keyword to be run at the end of the wait until page ready keyword"""
-        self._page_ready_keyword_list.remove(keyword_name)
-        
     def _wait_until_page_ready(self, timeout=None):
         """Semi blocking API that incorporated different strategies for cross-browser support."""
         if self._block_until_page_ready:
