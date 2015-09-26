@@ -1,3 +1,9 @@
+0.5.6 (2015.09.26)
+==================
+
+* Add ``get_browser_logs`` keyword.
+* Refactor library parameters.
+
 0.5.5 (2015.09.22)
 ==================
 

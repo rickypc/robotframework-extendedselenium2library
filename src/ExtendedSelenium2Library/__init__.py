@@ -60,6 +60,7 @@ class ExtendedSelenium2Library(Selenium2Library):
     Non-inherited Keywords:
     | `Element Attribute Should Contain`     |
     | `Element Attribute Should Not Contain` |
+    | `Get Browser Logs`                     |
     | `Is Element Visible`                   |
     | `Register Page Ready Keyword`          |
     | `Remove Page Ready Keyword`            |
@@ -109,14 +110,12 @@ class ExtendedSelenium2Library(Selenium2Library):
     ROBOT_LIBRARY_SCOPE = 'GLOBAL'
     ROBOT_LIBRARY_VERSION = __version__
 
-    def __init__(self, timeout=90.0, implicit_wait=15.0, run_on_failure='Capture Page Screenshot',
-                 block_until_page_ready=True, browser_breath_delay=0.05, ensure_jq=True,
-                 poll_frequency=0.2):
+    def __init__(self, implicit_wait=15.0, **kwargs):
         # pylint: disable=line-too-long
         """ExtendedSelenium2Library can be imported with optional arguments.
 
         Arguments:
-        - ``timeout``: The maximum value to wait for all waiting actions. (Default 90.0)
+        - ``timeout``: The maximum value to wait for all waiting actions. (Default 5.0)
                        It can be set later with `Set Selenium Timeout`.
                        See `introduction` for more information about ``timeout``.
         - ``implicit_wait``: The maximum implicit timeout value to wait when looking
@@ -132,6 +131,10 @@ class ExtendedSelenium2Library(Selenium2Library):
                               Using the value "Nothing" will disable this feature altogether.
                               See `Register Keyword To Run On Failure` keyword for
                               more information about this functionality.
+        - ``screenshot_root_directory``: The default root directory that screenshots should be
+                                         stored in. If not provided, the default directory will be
+                                         where [http://goo.gl/lES6WM|Robot Framework] places its
+                                         logfile.
         - ``block_until_page_ready``: A boolean flag to block the execution until
                                       the page is ready. (Default True)
         - ``browser_breath_delay``: The delay value in seconds to give the browser enough time to
@@ -148,19 +151,17 @@ class ExtendedSelenium2Library(Selenium2Library):
         | Library `|` ExtendedSelenium2Library `|` timeout=10      `|` run_on_failure=Nothing    | # Sets default timeout to 10 seconds and does nothing on failure           |
         """
         # pylint: disable=line-too-long
-        Selenium2Library.__init__(self, timeout, implicit_wait, run_on_failure)
-        self._block_until_page_ready = block_until_page_ready
-        self._browser_breath_delay = 0.05 \
-            if browser_breath_delay is None else float(browser_breath_delay)
+        self._block_until_page_ready = kwargs.pop('block_until_page_ready', True)
+        self._browser_breath_delay = float(kwargs.pop('browser_breath_delay', 0.05))
+        self._ensure_jq = kwargs.pop('ensure_jq', True)
+        self._poll_frequency = float(kwargs.pop('poll_frequency', 0.2))
+        Selenium2Library.__init__(self, implicit_wait=implicit_wait, **kwargs)
         self._element_finder = ExtendedElementFinder()
-        self._ensure_jq = True if ensure_jq else False
-        self._implicit_wait_in_secs = 15.0 \
-            if implicit_wait is None else float(implicit_wait)
+        self._implicit_wait_in_secs = float(implicit_wait) if implicit_wait is not None else 15.0
         jquery_bootstrap = self.JQUERY_BOOTSTRAP % \
             {'jquery_url': self.JQUERY_URL} if self._ensure_jq else ''
         self._page_ready_bootstrap = self.PAGE_READY_WRAPPER % \
             {'jquery_bootstrap': jquery_bootstrap}
-        self._poll_frequency = 0.2 if poll_frequency is None else float(poll_frequency)
         self._table_element_finder._element_finder = self._element_finder  # pylint: disable=protected-access
         self._page_ready_keyword_list = []
         self._builtin = BuiltIn()
@@ -242,6 +243,17 @@ class ExtendedSelenium2Library(Selenium2Library):
                 message = "Element attribute '%s' should not contain '%s'" \
                           " but it did." % (attribute_locator, unexpected)
             raise AssertionError(message)
+
+    def get_browser_logs(self):
+        """Returns the Javascript console logs from the browser.
+
+        Please see [https://goo.gl/S7yvqR|Logging Preferences JSON object] to set
+        how verbose the logging should be. (Default 'SEVERE')
+
+        Examples:
+        | Get Browser Logs |
+        """
+        return self._current_browser().get_log('browser')
 
     def get_location(self):
         # AngularJS support
