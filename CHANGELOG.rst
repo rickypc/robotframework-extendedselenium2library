@@ -1,3 +1,8 @@
+0.5.7 (2015.10.04)
+==================
+
+* Add ``wait_until_element_contains_attribute`` and ``wait_until_element_does_not_contain_attribute`` keywords.
+
 0.5.6 (2015.09.26)
 ==================
 

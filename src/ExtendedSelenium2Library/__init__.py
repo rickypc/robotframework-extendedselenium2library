@@ -58,16 +58,18 @@ class ExtendedSelenium2Library(Selenium2Library):
     most modern browsers and can be used with both Python and Jython interpreters.
 
     Non-inherited Keywords:
-    | `Element Attribute Should Contain`     |
-    | `Element Attribute Should Not Contain` |
-    | `Get Browser Logs`                     |
-    | `Is Element Visible`                   |
-    | `Register Page Ready Keyword`          |
-    | `Remove Page Ready Keyword`            |
-    | `Wait For Async Condition`             |
-    | `Wait Until Angular Ready`             |
-    | `Wait Until Location Contains`         |
-    | `Wait Until Location Does Not Contain` |
+    | `Element Attribute Should Contain`              |
+    | `Element Attribute Should Not Contain`          |
+    | `Get Browser Logs`                              |
+    | `Is Element Visible`                            |
+    | `Register Page Ready Keyword`                   |
+    | `Remove Page Ready Keyword`                     |
+    | `Wait For Async Condition`                      |
+    | `Wait Until Angular Ready`                      |
+    | `Wait Until Element Contains Attribute`         |
+    | `Wait Until Element Does Not Contain Attribute` |
+    | `Wait Until Location Contains`                  |
+    | `Wait Until Location Does Not Contain`          |
 
     AngularJS Locators Support:
     | *AngularJS Strategy* | *Example*                                         | *Description*                                        |
@@ -210,7 +212,7 @@ class ExtendedSelenium2Library(Selenium2Library):
         - ``attribute_locator``: The locator to find requested element attribute. It consists of
                                  element locator followed by an @ sign and attribute name,
                                  for example "element_id@class".
-        - ``expected``: The expected attribute value.
+        - ``expected``: The expected element attribute value.
         - ``message``: The value that would be use to override the default error message.
 
         Examples:
@@ -231,7 +233,7 @@ class ExtendedSelenium2Library(Selenium2Library):
         - ``attribute_locator``: The locator to find requested element attribute. It consists of
                                  element locator followed by an @ sign and attribute name,
                                  for example "element_id@class".
-        - ``unexpected``: The unexpected attribute value.
+        - ``unexpected``: The unexpected element attribute value.
         - ``message``: The value that would be use to override the default error message.
 
         Examples:
@@ -444,6 +446,70 @@ class ExtendedSelenium2Library(Selenium2Library):
                 browser.set_script_timeout(self._timeout_in_secs)
         finally:
             browser.set_script_timeout(self._timeout_in_secs)
+
+    def wait_until_element_contains_attribute(self, attribute_locator, expected, timeout=None,
+                                              error=None):
+        """Waits until element attribute identified by ``attribute_locator``
+        contains ``expected``.
+        Fails if ``timeout`` expires before the ``expected`` element attribute
+        presents on the page.
+
+        Arguments:
+        - ``attribute_locator``: The locator to find requested element attribute. It consists of
+                                 element locator followed by an @ sign and attribute name,
+                                 for example "element_id@class".
+        - ``expected``: The expected element attribute value.
+        - ``timeout``: The maximum value to wait for element attribute to contains ``expected``.
+                       See `introduction` for more information about ``timeout`` and
+                       its default value.
+        - ``error``: The value that would be use to override the default error message.
+
+        See also `Wait Until Element Does Not Contain Attribute`, `Wait Until Page Contains`,
+        `Wait Until Page Contains Element`, `Wait For Condition`,
+        `Wait Until Element Is Visible` and BuiltIn keyword `Wait Until Keyword Succeeds`.
+
+        Examples:
+        | Wait Until Element Contains Attribute | css=div.class@class | value |
+        """
+        timeout = self._timeout_in_secs if timeout is None else utils.timestr_to_secs(timeout)
+        if not error:
+            error = "Element did not contain attribute '%s' after %s" %\
+                    (expected, self._format_timeout(timeout))
+        WebDriverWait(self, timeout, self._poll_frequency).\
+            until(lambda driver: expected in driver.get_element_attribute(attribute_locator),
+                  error)
+
+    def wait_until_element_does_not_contain_attribute(self, attribute_locator, unexpected,
+                                                      timeout=None, error=None):
+        """Waits until element attribute identified by ``attribute_locator``
+        does not contain ``unexpected``.
+        Fails if ``timeout`` expires before the ``unexpected`` element attribute
+        goes away from the page.
+
+        Arguments:
+        - ``attribute_locator``: The locator to find requested element attribute. It consists of
+                                 element locator followed by an @ sign and attribute name,
+                                 for example "element_id@class".
+        - ``unexpected``: The unexpected element attribute value.
+        - ``timeout``: The maximum value to wait for ``unexpected`` element attribute to go away.
+                       See `introduction` for more information about ``timeout`` and
+                       its default value.
+        - ``error``: The value that would be use to override the default error message.
+
+        See also `Wait Until Element Contains Attribute`, `Wait Until Page Contains`,
+        `Wait Until Page Contains Element`, `Wait For Condition`,
+        `Wait Until Element Is Visible` and BuiltIn keyword `Wait Until Keyword Succeeds`.
+
+        Examples:
+        | Wait Until Element Does Not Contain Attribute | css=div.class@class | value |
+        """
+        timeout = self._timeout_in_secs if timeout is None else utils.timestr_to_secs(timeout)
+        if not error:
+            error = "Element was still contain attribute '%s' after %s" %\
+                    (unexpected, self._format_timeout(timeout))
+        WebDriverWait(self, timeout, self._poll_frequency).\
+            until_not(lambda driver: unexpected in driver.get_element_attribute(attribute_locator),
+                      error)
 
     def wait_until_element_is_not_visible(self, locator, timeout=None, error=None):
         timeout = self._implicit_wait_in_secs if timeout is None else utils.timestr_to_secs(timeout)
