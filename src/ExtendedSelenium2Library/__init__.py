@@ -22,23 +22,21 @@ Extended Selenium2 Library - a web testing library with AngularJS support.
 """
 
 from ExtendedSelenium2Library.decorators import inherit_docs
+from ExtendedSelenium2Library.keywords import ExtendedJavascriptKeywords
+from ExtendedSelenium2Library.keywords import ExtendedWaitingKeywords
 from ExtendedSelenium2Library.locators import ExtendedElementFinder
 from ExtendedSelenium2Library.version import get_version
-from robot import utils
-from selenium.common.exceptions import TimeoutException
-from selenium.webdriver.support.ui import WebDriverWait
-from selenium.webdriver.support.expected_conditions import staleness_of, visibility_of
+from robot.libraries.BuiltIn import BuiltIn
 from Selenium2Library import Selenium2Library
 from sys import exc_info
-from time import sleep
-from robot.libraries.BuiltIn import BuiltIn
 
 __version__ = get_version()
 
 
 # pylint: disable=too-many-ancestors
 @inherit_docs
-class ExtendedSelenium2Library(Selenium2Library):
+class ExtendedSelenium2Library(Selenium2Library, ExtendedJavascriptKeywords,
+                               ExtendedWaitingKeywords):
     # pylint: disable=line-too-long
     """ExtendedSelenium2Library is a [http://goo.gl/boVQia|Selenium2 (WebDriver)]
     web testing library with [https://goo.gl/Kzz8Y3|AngularJS] support and
@@ -58,18 +56,22 @@ class ExtendedSelenium2Library(Selenium2Library):
     most modern browsers and can be used with both Python and Jython interpreters.
 
     Non-inherited Keywords:
-    | `Element Attribute Should Contain`              |
-    | `Element Attribute Should Not Contain`          |
-    | `Get Browser Logs`                              |
-    | `Is Element Visible`                            |
-    | `Register Page Ready Keyword`                   |
-    | `Remove Page Ready Keyword`                     |
-    | `Wait For Async Condition`                      |
-    | `Wait Until Angular Ready`                      |
-    | `Wait Until Element Contains Attribute`         |
-    | `Wait Until Element Does Not Contain Attribute` |
-    | `Wait Until Location Contains`                  |
-    | `Wait Until Location Does Not Contain`          |
+    | `Element Attribute Should Contain`                 |
+    | `Element Attribute Should Not Contain`             |
+    | `Execute Async Javascript With Replaced Variables` |
+    | `Execute Javascript With Replaced Variables`       |
+    | `Get Browser Logs`                                 |
+    | `Is Element Visible`                               |
+    | `Register Page Ready Keyword`                      |
+    | `Remove Page Ready Keyword`                        |
+    | `Wait For Async Condition`                         |
+    | `Wait For Condition With Replaced Variables`       |
+    | `Wait Until Angular Ready`                         |
+    | `Wait Until Element Contains Attribute`            |
+    | `Wait Until Element Does Not Contain Attribute`    |
+    | `Wait Until Location Contains`                     |
+    | `Wait Until Location Does Not Contain`             |
+    | `Warn Any Javascript Errors`                       |
 
     AngularJS Locators Support:
     | *AngularJS Strategy* | *Example*                                         | *Description*                                        |
@@ -155,18 +157,20 @@ class ExtendedSelenium2Library(Selenium2Library):
         # pylint: disable=line-too-long
         self._block_until_page_ready = kwargs.pop('block_until_page_ready', True)
         self._browser_breath_delay = float(kwargs.pop('browser_breath_delay', 0.05))
+        self._builtin = BuiltIn()
         self._ensure_jq = kwargs.pop('ensure_jq', True)
         self._poll_frequency = float(kwargs.pop('poll_frequency', 0.2))
         Selenium2Library.__init__(self, implicit_wait=implicit_wait, **kwargs)
+        ExtendedJavascriptKeywords.__init__(self)
+        ExtendedWaitingKeywords.__init__(self)
         self._element_finder = ExtendedElementFinder()
         self._implicit_wait_in_secs = float(implicit_wait) if implicit_wait is not None else 15.0
+        self._page_ready_keyword_list = []
         jquery_bootstrap = self.JQUERY_BOOTSTRAP % \
             {'jquery_url': self.JQUERY_URL} if self._ensure_jq else ''
         self._page_ready_bootstrap = self.PAGE_READY_WRAPPER % \
             {'jquery_bootstrap': jquery_bootstrap}
         self._table_element_finder._element_finder = self._element_finder  # pylint: disable=protected-access
-        self._page_ready_keyword_list = []
-        self._builtin = BuiltIn()
 
     def click_button(self, locator):
         self._scroll_into_view(locator)
@@ -349,238 +353,6 @@ class ExtendedSelenium2Library(Selenium2Library):
         self._wait_until_page_ready()
         self.wait_until_angular_ready()
 
-    def wait_for_async_condition(self, condition, timeout=None, error=None):
-        """Waits until the given asynchronous ``condition`` is true or ``timeout`` expires.
-
-        Arguments:
-        - ``condition``: The ``condition`` can be arbitrary JavaScript expression but
-                         must explicitly signal when they are finished by invoking
-                         the provided callback at the end. See `Execute Async Javascript`
-                         for information about executing asynchronous JavaScript.
-        - ``timeout``: The maximum value to wait for ``condition`` to come back true.
-                       See `introduction` for more information about ``timeout`` and
-                       its default value.
-        - ``error``: The value that would be use to override the default error message.
-
-        See also `Wait For Condition`, `Wait Until Page Contains`, `Wait Until Page Contains
-        Element`, `Wait Until Element Is Visible` and
-        BuiltIn keyword `Wait Until Keyword Succeeds`.
-
-        Examples:
-        | Wait For Async Condition | arguments[arguments.length-1](true) | 15s |
-        """
-        timeout = self._timeout_in_secs if timeout is None else utils.timestr_to_secs(timeout)
-        if not error:
-            error = "Condition '%s' did not become true in %s" % \
-                (condition, self._format_timeout(timeout))
-        WebDriverWait(self._current_browser(), timeout, self._poll_frequency).\
-            until(lambda driver: driver.execute_async_script(condition), error)
-
-    def wait_until_angular_ready(self, timeout=None, error=None):
-        """Waits until [https://goo.gl/Kzz8Y3|AngularJS] is ready to process the next request or
-        ``timeout`` expires.
-
-        You generally *do not* need to call this keyword directly,
-        below is the list of keywords which already call this keyword internally:
-
-        | `Click Button`                 |
-        | `Click Element`                |
-        | `Click Element At Coordinates` |
-        | `Click Image`                  |
-        | `Click Link`                   |
-        | `Double Click Element`         |
-        | `Input Password`               |
-        | `Input Text`                   |
-        | `Open Browser`                 |
-        | `Select All From List`         |
-        | `Select Checkbox`              |
-        | `Select From List`             |
-        | `Select From List By Index`    |
-        | `Select From List By Label`    |
-        | `Select From List By Value`    |
-        | `Select Radio Button`          |
-        | `Submit Form`                  |
-
-        Arguments:
-        - ``timeout``: The maximum value to wait for [https://goo.gl/Kzz8Y3|AngularJS]
-                       to be ready to process the next request.
-                       See `introduction` for more information about ``timeout`` and
-                       its default value.
-        - ``error``: The value that would be use to override the default error message.
-
-        See also `Wait For Condition`, `Wait Until Page Contains`,
-        `Wait Until Page Contains Element`, `Wait Until Element Is Visible`
-        and BuiltIn keyword `Wait Until Keyword Succeeds`.
-
-        Examples:
-        | Wait Until Angular Ready | 15s |
-        """
-        timeout = self._implicit_wait_in_secs if timeout is None else utils.timestr_to_secs(timeout)
-        if not error:
-            error = 'AngularJS is not ready in %s' % self._format_timeout(timeout)
-        # we add more validation here to support transition between AngularJs to non AngularJS page.
-        script = self.NG_WRAPPER % {'prefix': 'var cb=arguments[arguments.length-1];'
-                                              'if(window.angular){',
-                                    'handler': 'function(){cb(true)}',
-                                    'suffix': '}else{cb(true)}'}
-        browser = self._current_browser()
-        browser.set_script_timeout(timeout)
-        try:
-            WebDriverWait(browser, timeout, self._poll_frequency).\
-                until(lambda driver: driver.execute_async_script(script), error)
-        except TimeoutException:
-            # prevent double wait
-            pass
-        except:
-            self._debug(exc_info()[0])
-            # still inflight, second chance. let the browser take a deep breath...
-            sleep(self._browser_breath_delay)
-            try:
-                WebDriverWait(browser, timeout, self._poll_frequency).\
-                    until(lambda driver: driver.execute_async_script(script), error)
-            except:
-                # instead of halting the process because AngularJS is not ready
-                # in <TIMEOUT>, we try our luck...
-                self._debug(exc_info()[0])
-            finally:
-                browser.set_script_timeout(self._timeout_in_secs)
-        finally:
-            browser.set_script_timeout(self._timeout_in_secs)
-
-    def wait_until_element_contains_attribute(self, attribute_locator, expected, timeout=None,
-                                              error=None):
-        """Waits until element attribute identified by ``attribute_locator``
-        contains ``expected``.
-        Fails if ``timeout`` expires before the ``expected`` element attribute
-        presents on the page.
-
-        Arguments:
-        - ``attribute_locator``: The locator to find requested element attribute. It consists of
-                                 element locator followed by an @ sign and attribute name,
-                                 for example "element_id@class".
-        - ``expected``: The expected element attribute value.
-        - ``timeout``: The maximum value to wait for element attribute to contains ``expected``.
-                       See `introduction` for more information about ``timeout`` and
-                       its default value.
-        - ``error``: The value that would be use to override the default error message.
-
-        See also `Wait Until Element Does Not Contain Attribute`, `Wait Until Page Contains`,
-        `Wait Until Page Contains Element`, `Wait For Condition`,
-        `Wait Until Element Is Visible` and BuiltIn keyword `Wait Until Keyword Succeeds`.
-
-        Examples:
-        | Wait Until Element Contains Attribute | css=div.class@class | value |
-        """
-        timeout = self._timeout_in_secs if timeout is None else utils.timestr_to_secs(timeout)
-        if not error:
-            error = "Element did not contain attribute '%s' after %s" %\
-                    (expected, self._format_timeout(timeout))
-        WebDriverWait(self, timeout, self._poll_frequency).\
-            until(lambda driver: expected in driver.get_element_attribute(attribute_locator),
-                  error)
-
-    def wait_until_element_does_not_contain_attribute(self, attribute_locator, unexpected,
-                                                      timeout=None, error=None):
-        """Waits until element attribute identified by ``attribute_locator``
-        does not contain ``unexpected``.
-        Fails if ``timeout`` expires before the ``unexpected`` element attribute
-        goes away from the page.
-
-        Arguments:
-        - ``attribute_locator``: The locator to find requested element attribute. It consists of
-                                 element locator followed by an @ sign and attribute name,
-                                 for example "element_id@class".
-        - ``unexpected``: The unexpected element attribute value.
-        - ``timeout``: The maximum value to wait for ``unexpected`` element attribute to go away.
-                       See `introduction` for more information about ``timeout`` and
-                       its default value.
-        - ``error``: The value that would be use to override the default error message.
-
-        See also `Wait Until Element Contains Attribute`, `Wait Until Page Contains`,
-        `Wait Until Page Contains Element`, `Wait For Condition`,
-        `Wait Until Element Is Visible` and BuiltIn keyword `Wait Until Keyword Succeeds`.
-
-        Examples:
-        | Wait Until Element Does Not Contain Attribute | css=div.class@class | value |
-        """
-        timeout = self._timeout_in_secs if timeout is None else utils.timestr_to_secs(timeout)
-        if not error:
-            error = "Element was still contain attribute '%s' after %s" %\
-                    (unexpected, self._format_timeout(timeout))
-        WebDriverWait(self, timeout, self._poll_frequency).\
-            until_not(lambda driver: unexpected in driver.get_element_attribute(attribute_locator),
-                      error)
-
-    def wait_until_element_is_not_visible(self, locator, timeout=None, error=None):
-        timeout = self._implicit_wait_in_secs if timeout is None else utils.timestr_to_secs(timeout)
-        if not error:
-            error = 'Element \'%s\' was still visible after %s' % \
-                (locator, self._format_timeout(timeout))
-        element = self._element_find(locator, True, True)
-        if element is None:
-            raise AssertionError("Element '%s' not found." % locator)
-        WebDriverWait(None, timeout, self._poll_frequency).until_not(visibility_of(element), error)
-
-    def wait_until_element_is_visible(self, locator, timeout=None, error=None):
-        timeout = self._implicit_wait_in_secs if timeout is None else utils.timestr_to_secs(timeout)
-        if not error:
-            error = 'Element \'%s\' was not visible in %s' % \
-                (locator, self._format_timeout(timeout))
-        element = self._element_find(locator, True, True)
-        if element is None:
-            raise AssertionError("Element '%s' not found." % locator)
-        WebDriverWait(None, timeout, self._poll_frequency).until(visibility_of(element), error)
-
-    def wait_until_location_contains(self, expected, timeout=None, error=None):
-        """Waits until current URL contains ``expected``.
-        Fails if ``timeout`` expires before the ``expected`` URL presents on the page.
-
-        Arguments:
-        - ``expected``: The expected URL value.
-        - ``timeout``: The maximum value to wait for URL to contains ``expected``.
-                       See `introduction` for more information about ``timeout`` and
-                       its default value.
-        - ``error``: The value that would be use to override the default error message.
-
-        See also `Wait Until Location Does Not Contain`, `Wait Until Page Contains`,
-        `Wait Until Page Contains Element`, `Wait For Condition`,
-        `Wait Until Element Is Visible` and BuiltIn keyword `Wait Until Keyword Succeeds`.
-
-        Examples:
-        | Wait Until Location Contains | www | 15s |
-        """
-        timeout = self._timeout_in_secs if timeout is None else utils.timestr_to_secs(timeout)
-        if not error:
-            error = "Location did not contain '%s' after %s" %\
-                    (expected, self._format_timeout(timeout))
-        WebDriverWait(self, timeout, self._poll_frequency).\
-            until(lambda driver: expected in driver.get_location(), error)
-
-    def wait_until_location_does_not_contain(self, unexpected, timeout=None, error=None):
-        """Waits until current URL does not contain ``unexpected``.
-        Fails if ``timeout`` expires before the ``unexpected`` URL goes away from the page.
-
-        Arguments:
-        - ``unexpected``: The unexpected URL value.
-        - ``timeout``: The maximum value to wait for ``unexpected`` URL to go away.
-                       See `introduction` for more information about ``timeout`` and
-                       its default value.
-        - ``error``: The value that would be use to override the default error message.
-
-        See also `Wait Until Location Contains`, `Wait Until Page Contains`,
-        `Wait Until Page Contains Element`, `Wait For Condition`,
-        `Wait Until Element Is Visible` and BuiltIn keyword `Wait Until Keyword Succeeds`.
-
-        Examples:
-        | Wait Until Location Does Not Contain | www | 15s |
-        """
-        timeout = self._timeout_in_secs if timeout is None else utils.timestr_to_secs(timeout)
-        if not error:
-            error = "Location was still contain '%s' after %s" %\
-                    (unexpected, self._format_timeout(timeout))
-        WebDriverWait(self, timeout, self._poll_frequency).\
-            until_not(lambda driver: unexpected in driver.get_location(), error)
-
     def _angular_select_checkbox_or_radio_button(self, element):
         """Select checkbox or radio button when AngularJS is ready."""
         if element is None:
@@ -662,32 +434,3 @@ class ExtendedSelenium2Library(Selenium2Library):
         else:
             element.click()
             self._wait_until_page_ready()
-
-    def _wait_until_page_ready(self, timeout=None):
-        """Semi blocking API that incorporated different strategies for cross-browser support."""
-        if self._block_until_page_ready:
-            delay = self._browser_breath_delay
-            if delay < 1:
-                delay *= 10
-            # let the browser take a deep breath...
-            sleep(delay)
-            timeout = self._implicit_wait_in_secs \
-                if timeout is None else utils.timestr_to_secs(timeout)
-            browser = self._current_browser()
-            try:
-                WebDriverWait(None, timeout, self._poll_frequency).\
-                    until_not(staleness_of(browser.find_element_by_tag_name('html')), '')
-            except:
-                # instead of halting the process because document is not ready
-                # in <TIMEOUT>, we try our luck...
-                self._debug(exc_info()[0])
-            try:
-                WebDriverWait(browser, timeout, self._poll_frequency).\
-                    until(lambda driver: driver.
-                          execute_async_script(self._page_ready_bootstrap), '')
-            except:
-                # instead of halting the process because document is not ready
-                # in <TIMEOUT>, we try our luck...
-                self._debug(exc_info()[0])
-            for keyword in self._page_ready_keyword_list:
-                self._builtin.run_keyword(keyword)

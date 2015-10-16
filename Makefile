@@ -37,7 +37,10 @@ version:
 
 lint:clean
 	flake8 --max-complexity 10
-	pylint --rcfile=setup.cfg src/$(LIBRARY_NAME)/*.py src/$(LIBRARY_NAME)/decorators/*.py src/$(LIBRARY_NAME)/locators/*.py
+	pylint --rcfile=setup.cfg src/$(LIBRARY_NAME)/*.py\
+ 		src/$(LIBRARY_NAME)/decorators/*.py\
+		src/$(LIBRARY_NAME)/keywords/*.py\
+ 		src/$(LIBRARY_NAME)/locators/*.py
 
 doc:clean
 	python -m robot.libdoc src/$(LIBRARY_NAME) doc/$(LIBRARY_NAME).html

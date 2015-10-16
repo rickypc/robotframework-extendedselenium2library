@@ -1,3 +1,12 @@
+0.6.0 (2015.10.15)
+==================
+
+* Add ``Execute Async Javascript With Replaced Variables`` keyword.
+* Add ``Execute Javascript With Replaced Variables`` keyword.
+* Add ``Wait For Condition With Replaced Variables`` keyword.
+* Add ``Warn Any Javascript Errors`` keyword.
+* Major restructure on existing keywords for better maintainability.
+
 0.5.7 (2015.10.04)
 ==================
 
