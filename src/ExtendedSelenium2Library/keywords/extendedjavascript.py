@@ -128,7 +128,7 @@ class ExtendedJavascriptKeywords(_JavaScriptKeywords):
 
         def include(value):
             """Filter out error messages based on exclusion list."""
-            return value not in excludes
+            return not any(True for e in excludes if e in value)
         # pylint: disable=no-member
         logs = self.get_browser_logs()
         # opt-out approach
