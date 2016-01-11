@@ -29,7 +29,8 @@ from setuptools import setup, find_packages
 
 LIBRARY_NAME = 'ExtendedSelenium2Library'
 CWD = abspath(dirname(__file__))
-execfile(join(CWD, 'src', LIBRARY_NAME, 'version.py'))
+VERSION_PATH = join(CWD, 'src', LIBRARY_NAME, 'version.py')
+exec(compile(open(VERSION_PATH).read(), VERSION_PATH, 'exec'))
 
 with codecs.open(join(CWD, 'README.rst'), encoding='utf-8') as reader:
     LONG_DESCRIPTION = reader.read()

@@ -21,8 +21,8 @@
 Extended Selenium2 Library - a web testing library with AngularJS support.
 """
 
-from Selenium2Library.keywords import _JavaScriptKeywords
 from re import sub
+from Selenium2Library.keywords import _JavaScriptKeywords
 
 
 class ExtendedJavascriptKeywords(_JavaScriptKeywords):
@@ -110,6 +110,15 @@ class ExtendedJavascriptKeywords(_JavaScriptKeywords):
         self._debug('Executing JavaScript:\n%s' % js_code)
         # pylint: disable=no-member
         return self._current_browser().execute_script(js_code)
+
+    def get_screen_size(self):
+        """Returns current screen size as `width` and `height`.
+
+        Examples:
+        | ${width} | ${height} = | Get Screen Size |
+        """
+        # pylint: disable=no-member
+        return self._current_browser().execute_script('return [screen.width, screen.height]')
 
     def warn_any_javascript_errors(self, excludes=None, label=''):
         """Log any JavaScript errors in the page as warning in the test report.

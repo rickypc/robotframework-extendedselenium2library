@@ -27,7 +27,7 @@ Using ``pip``
 
 The recommended installation method is using pip_:
 
-.. code:: bash
+.. code:: console
 
     pip install robotframework-extendedselenium2library
 
@@ -35,7 +35,7 @@ The main benefit of using ``pip`` is that it automatically installs all
 dependencies needed by the library. Other nice features are easy upgrading
 and support for un-installation:
 
-.. code:: bash
+.. code:: console
 
     pip install --upgrade robotframework-extendedselenium2library
     pip uninstall robotframework-extendedselenium2library
@@ -44,7 +44,7 @@ Notice that using ``--upgrade`` above updates both the library and all
 its dependencies to the latest version. If you want, you can also install
 a specific version or upgrade only the Selenium tool used by the library:
 
-.. code:: bash
+.. code:: console
 
     pip install robotframework-extendedselenium2library==x.x.x
     pip install --upgrade selenium
@@ -85,7 +85,7 @@ and its dependencies yourself.
 
 - Find each public key used to sign the package:
 
-.. code:: bash
+.. code:: console
 
     gpg --keyserver pgp.mit.edu --search-keys D1406DE7
 
@@ -93,7 +93,7 @@ and its dependencies yourself.
 
 - Verify the package against its PGP signature:
 
-.. code:: bash
+.. code:: console
 
     gpg --verify robotframework-extendedselenium2library-x.x.x.tar.gz.asc robotframework-extendedselenium2library-x.x.x.tar.gz
 
@@ -101,7 +101,7 @@ and its dependencies yourself.
 
 - Go to each created directory from the command line and install each project using:
 
-.. code:: bash
+.. code:: console
 
        python setup.py install
 
@@ -124,26 +124,25 @@ Usage
 
 To write tests with Robot Framework and ExtendedSelenium2Library,
 ExtendedSelenium2Library must be imported into your Robot test suite.
+
+.. code:: robotframework
+
+    *** Settings ***
+    Library  ExtendedSelenium2Library
+
 See `Robot Framework User Guide`_ for more information.
+
+More information about Robot Framework standard libraries and built-in tools
+can be found in the `Robot Framework Documentation`_.
 
 Building Keyword Documentation
 ------------------------------
 
 The `Keyword Documentation`_ can be found online, if you need to generate the keyword documentation, run:
 
-.. code:: bash
+.. code:: console
 
     make doc
-
-Usage
------
-
-To write tests with Robot Framework and ExtendedSelenium2Library,
-ExtendedSelenium2Library must be imported into your Robot test suite.
-See `Robot Framework User Guide`_ for more information.
-
-More information about Robot Framework standard libraries and built-in tools
-can be found in the `Robot Framework Documentation`_.
 
 Contributing
 ------------

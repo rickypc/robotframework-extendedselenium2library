@@ -21,14 +21,14 @@
 Extended Selenium2 Library - a web testing library with AngularJS support.
 """
 
+from sys import exc_info
+from robot.libraries.BuiltIn import BuiltIn
+from Selenium2Library import Selenium2Library
 from ExtendedSelenium2Library.decorators import inherit_docs
 from ExtendedSelenium2Library.keywords import ExtendedJavascriptKeywords
 from ExtendedSelenium2Library.keywords import ExtendedWaitingKeywords
 from ExtendedSelenium2Library.locators import ExtendedElementFinder
 from ExtendedSelenium2Library.version import get_version
-from robot.libraries.BuiltIn import BuiltIn
-from Selenium2Library import Selenium2Library
-from sys import exc_info
 
 __version__ = get_version()
 
@@ -61,6 +61,7 @@ class ExtendedSelenium2Library(Selenium2Library, ExtendedJavascriptKeywords,
     | `Execute Async Javascript With Replaced Variables` |
     | `Execute Javascript With Replaced Variables`       |
     | `Get Browser Logs`                                 |
+    | `Get Screen Size`                                  |
     | `Is Element Visible`                               |
     | `Register Page Ready Keyword`                      |
     | `Remove Page Ready Keyword`                        |
@@ -155,10 +156,10 @@ class ExtendedSelenium2Library(Selenium2Library, ExtendedJavascriptKeywords,
         | Library `|` ExtendedSelenium2Library `|` timeout=10      `|` run_on_failure=Nothing    | # Sets default timeout to 10 seconds and does nothing on failure           |
         """
         # pylint: disable=line-too-long
-        self._block_until_page_ready = kwargs.pop('block_until_page_ready', True)
+        self._block_until_page_ready = bool(kwargs.pop('block_until_page_ready', True))
         self._browser_breath_delay = float(kwargs.pop('browser_breath_delay', 0.05))
         self._builtin = BuiltIn()
-        self._ensure_jq = kwargs.pop('ensure_jq', True)
+        self._ensure_jq = bool(kwargs.pop('ensure_jq', True))
         self._poll_frequency = float(kwargs.pop('poll_frequency', 0.2))
         Selenium2Library.__init__(self, implicit_wait=implicit_wait, **kwargs)
         ExtendedJavascriptKeywords.__init__(self)
@@ -172,42 +173,49 @@ class ExtendedSelenium2Library(Selenium2Library, ExtendedJavascriptKeywords,
             {'jquery_bootstrap': jquery_bootstrap}
         self._table_element_finder._element_finder = self._element_finder  # pylint: disable=protected-access
 
-    def click_button(self, locator):
+    # pylint: disable=arguments-differ
+    def click_button(self, locator, skip_ready=False):
         self._scroll_into_view(locator)
         super(ExtendedSelenium2Library, self).click_button(locator)
-        self._wait_until_page_ready()
-        self.wait_until_angular_ready()
+        if not skip_ready:
+            self._wait_until_page_ready()
+            self.wait_until_angular_ready()
 
-    def click_element(self, locator):
+    def click_element(self, locator, skip_ready=False):
         self._scroll_into_view(locator)
         super(ExtendedSelenium2Library, self).click_element(locator)
-        self._wait_until_page_ready()
-        self.wait_until_angular_ready()
+        if not skip_ready:
+            self._wait_until_page_ready()
+            self.wait_until_angular_ready()
 
-    def click_element_at_coordinates(self, locator, xoffset, yoffset):
+    def click_element_at_coordinates(self, locator, xoffset, yoffset, skip_ready=False):
         self._scroll_into_view(locator)
         super(ExtendedSelenium2Library, self). \
             click_element_at_coordinates(locator, xoffset, yoffset)
-        self._wait_until_page_ready()
-        self.wait_until_angular_ready()
+        if not skip_ready:
+            self._wait_until_page_ready()
+            self.wait_until_angular_ready()
 
-    def click_image(self, locator):
+    def click_image(self, locator, skip_ready=False):
         self._scroll_into_view(locator)
         super(ExtendedSelenium2Library, self).click_image(locator)
-        self._wait_until_page_ready()
-        self.wait_until_angular_ready()
+        if not skip_ready:
+            self._wait_until_page_ready()
+            self.wait_until_angular_ready()
 
-    def click_link(self, locator):
+    def click_link(self, locator, skip_ready=False):
         self._scroll_into_view(locator)
         super(ExtendedSelenium2Library, self).click_link(locator)
-        self._wait_until_page_ready()
-        self.wait_until_angular_ready()
+        if not skip_ready:
+            self._wait_until_page_ready()
+            self.wait_until_angular_ready()
 
-    def double_click_element(self, locator):
+    def double_click_element(self, locator, skip_ready=False):
         self._scroll_into_view(locator)
         super(ExtendedSelenium2Library, self).double_click_element(locator)
-        self._wait_until_page_ready()
-        self.wait_until_angular_ready()
+        if not skip_ready:
+            self._wait_until_page_ready()
+            self.wait_until_angular_ready()
 
     def element_attribute_should_contain(self, attribute_locator, expected, message=''):
         """Verifies element attribute identified by ``attribute_locator`` contains ``expected``.
@@ -284,13 +292,12 @@ class ExtendedSelenium2Library(Selenium2Library, ExtendedJavascriptKeywords,
 
     # pylint: disable=too-many-arguments
     def open_browser(self, url, browser='firefox', alias=None, remote_url=False,
-                     desired_capabilities=None, ff_profile_dir=None):
+                     desired_capabilities=None, ff_profile_dir=None, skip_ready=False):
         index = super(ExtendedSelenium2Library, self).\
             open_browser(url, browser, alias, remote_url, desired_capabilities, ff_profile_dir)
-        # register the main window as the first window handle in the list
-        self.select_window()
-        self._wait_until_page_ready()
-        self.wait_until_angular_ready()
+        if not skip_ready:
+            self._wait_until_page_ready()
+            self.wait_until_angular_ready()
         return index
 
     def register_page_ready_keyword(self, keyword_name):
@@ -347,13 +354,14 @@ class ExtendedSelenium2Library(Selenium2Library, ExtendedJavascriptKeywords,
         if not element.is_selected():
             self._select_checkbox_or_radio_button(element)
 
-    def submit_form(self, locator=None):
+    def submit_form(self, locator=None, skip_ready=False):
         self._scroll_into_view(locator)
         super(ExtendedSelenium2Library, self).submit_form(locator)
-        self._wait_until_page_ready()
-        self.wait_until_angular_ready()
+        if not skip_ready:
+            self._wait_until_page_ready()
+            self.wait_until_angular_ready()
 
-    def _angular_select_checkbox_or_radio_button(self, element):
+    def _angular_select_checkbox_or_radio_button(self, element, skip_ready=False):
         """Select checkbox or radio button when AngularJS is ready."""
         if element is None:
             raise AssertionError("Element not found.")
@@ -363,10 +371,11 @@ class ExtendedSelenium2Library(Selenium2Library, ExtendedJavascriptKeywords,
                                                'prop(\'checked\',true).triggerHandler(\'click\')}',
                                     'suffix': ''}
         self._current_browser().execute_script(script, element)
-        self._wait_until_page_ready()
-        self.wait_until_angular_ready()
+        if not skip_ready:
+            self._wait_until_page_ready()
+            self.wait_until_angular_ready()
 
-    def _element_trigger_change(self, locator):
+    def _element_trigger_change(self, locator, skip_ready=False):
         """Trigger change event on target element when AngularJS is ready."""
         element = self._element_find(locator, True, True)
         if element is None:
@@ -378,22 +387,25 @@ class ExtendedSelenium2Library(Selenium2Library, ExtendedJavascriptKeywords,
                                                    'trigger(\'focusout\')}',
                                         'suffix': ''}
             self._current_browser().execute_script(script, element)
-            self._wait_until_page_ready()
-            self.wait_until_angular_ready()
+            if not skip_ready:
+                self._wait_until_page_ready()
+                self.wait_until_angular_ready()
         else:
-            self._wait_until_page_ready()
+            if not skip_ready:
+                self._wait_until_page_ready()
 
     def _get_browser_name(self):
         """Returns current browser name."""
         return self._current_browser().capabilities['browserName'].strip().lower()
 
-    def _input_text_into_text_field(self, locator, text):
+    def _input_text_into_text_field(self, locator, text, skip_ready=False):
         """Send keys to text field with AngularJS synchronization."""
         super(ExtendedSelenium2Library, self)._input_text_into_text_field(locator, text)
         element = self._element_find(locator, True, True)
         if self._is_angular_control(element):
-            self._wait_until_page_ready()
-            self.wait_until_angular_ready()
+            if not skip_ready:
+                self._wait_until_page_ready()
+                self.wait_until_angular_ready()
 
     def _is_angular_control(self, element):
         """Returns true if target element is an AngularJS control, otherwise false."""
@@ -427,10 +439,11 @@ class ExtendedSelenium2Library(Selenium2Library, ExtendedJavascriptKeywords,
             script = 'arguments[0].scrollIntoView(false)'
             self._current_browser().execute_script(script, element)
 
-    def _select_checkbox_or_radio_button(self, element):
+    def _select_checkbox_or_radio_button(self, element, skip_ready=False):
         """Select checkbox or radio button with AngularJS support."""
         if self._is_angular_control(element):
             self._angular_select_checkbox_or_radio_button(element)
         else:
             element.click()
-            self._wait_until_page_ready()
+            if not skip_ready:
+                self._wait_until_page_ready()

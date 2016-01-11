@@ -1,3 +1,11 @@
+0.6.2 (2016.01.10)
+==================
+
+* Add `skip_ready` argument to skip page ready check.
+* Add ``get_screen_size`` keyword.
+* Add Python 3.x support.
+* Follow lint suggestion.
+
 0.6.1 (2015.10.22)
 ==================
 

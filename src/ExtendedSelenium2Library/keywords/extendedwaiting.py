@@ -21,14 +21,14 @@
 Extended Selenium2 Library - a web testing library with AngularJS support.
 """
 
-from ExtendedSelenium2Library.decorators import inherit_docs
+from sys import exc_info
+from time import sleep
 from robot import utils
 from selenium.common.exceptions import TimeoutException
 from selenium.webdriver.support.expected_conditions import staleness_of, visibility_of
 from selenium.webdriver.support.ui import WebDriverWait
 from Selenium2Library.keywords import _WaitingKeywords
-from sys import exc_info
-from time import sleep
+from ExtendedSelenium2Library.decorators import inherit_docs
 
 
 @inherit_docs

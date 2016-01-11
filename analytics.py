@@ -21,7 +21,6 @@
 Extended Selenium2 Library - a web testing library with AngularJS support.
 """
 
-from __future__ import print_function
 from os.path import split
 from re import sub
 import sys

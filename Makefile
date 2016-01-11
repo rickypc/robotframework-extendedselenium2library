@@ -36,7 +36,10 @@ version:
 	python -m robot.libdoc src/$(LIBRARY_NAME) version
 
 lint:clean
-	flake8 --max-complexity 10
+	flake8 --max-complexity 10 src/$(LIBRARY_NAME)/*.py\
+ 		src/$(LIBRARY_NAME)/decorators/*.py\
+		src/$(LIBRARY_NAME)/keywords/*.py\
+ 		src/$(LIBRARY_NAME)/locators/*.py
 	pylint --rcfile=setup.cfg src/$(LIBRARY_NAME)/*.py\
  		src/$(LIBRARY_NAME)/decorators/*.py\
 		src/$(LIBRARY_NAME)/keywords/*.py\
