@@ -241,6 +241,7 @@ class ExtendedWaitingKeywords(_WaitingKeywords):
             until_not(lambda driver: unexpected in driver.get_element_attribute(attribute_locator),
                       error)
 
+    # pylint: disable=missing-docstring
     def wait_until_element_is_not_visible(self, locator, timeout=None, error=None):
         # pylint: disable=no-member
         timeout = self._get_timeout_value(timeout, self._implicit_wait_in_secs)
@@ -320,38 +321,60 @@ class ExtendedWaitingKeywords(_WaitingKeywords):
         """Returns default timeout when timeout is None."""
         return default if timeout is None else utils.timestr_to_secs(timeout)
 
-    def _wait_until_page_ready(self, timeout=None):
-        """Semi blocking API that incorporated different strategies for cross-browser support."""
+    def _wait_until_html_ready(self, browser, timeout):
+        """Wait until HTML is ready by using stale check."""
         # pylint: disable=no-member
-        if self._block_until_page_ready:
+        delay = self._browser_breath_delay
+        if delay < 1:
+            delay *= 10
+        # let the browser take a deep breath...
+        sleep(delay)
+        try:
             # pylint: disable=no-member
-            delay = self._browser_breath_delay
-            if delay < 1:
-                delay *= 10
-            # let the browser take a deep breath...
-            sleep(delay)
+            WebDriverWait(None, timeout, self._poll_frequency).\
+                until_not(staleness_of(browser.find_element_by_tag_name('html')), '')
+        except:
+            # instead of halting the process because document is not ready
+            # in <TIMEOUT>, we try our luck...
             # pylint: disable=no-member
-            timeout = self._get_timeout_value(timeout, self._implicit_wait_in_secs)
+            self._debug(exc_info()[0])
+
+    def _wait_until_page_ready(self, *args, **kwargs):
+        """Semi blocking API that incorporated different strategies for cross-browser support."""
+        response = kwargs.pop('default', None)
+        # pylint: disable=no-member
+        if not self._block_until_page_ready:
+            return response
+        # pylint: disable=no-member
+        browser = kwargs.pop('browser', self._current_browser())
+        prefix = kwargs.pop('prefix', 'var cb=arguments[arguments.length-1];if(window.angular){')
+        skip_stale_check = bool(kwargs.pop('skip_stale_check', False))
+        # pylint: disable=no-member
+        if self._ensure_jq and not skip_stale_check:
+            # only during possible page re-load/re-route
+            jquery_bootstrap = self.JQUERY_BOOTSTRAP % {'jquery_url': self.JQUERY_URL}
+            prefix = 'if(!window.jQuery){%(jquery_bootstrap)s}%(prefix)s' % \
+                {'jquery_bootstrap': jquery_bootstrap, 'prefix': prefix}
+        # pylint: disable=no-member
+        script = self.NG_WRAPPER % {'prefix': prefix,
+                                    'handler': kwargs.pop('handler', 'function(){cb(true)}'),
+                                    'suffix': kwargs.pop('suffix', '}else{cb(false)}')}
+        # pylint: disable=no-member
+        timeout = self._get_timeout_value(kwargs.pop('timeout', None), self._implicit_wait_in_secs)
+        if not skip_stale_check:
+            self._wait_until_html_ready(browser, timeout)
+        try:
+            if timeout != self._timeout_in_secs:
+                browser.set_script_timeout(timeout)
+            response = browser.execute_async_script(script, *args)
+        except TimeoutException:
+            # instead of halting the process because document is not ready
+            # in <TIMEOUT>, we try our luck...
+            self._debug(exc_info()[0])
+        finally:
+            if timeout != self._timeout_in_secs:
+                browser.set_script_timeout(self._timeout_in_secs)
+        for keyword in self._page_ready_keyword_list:
             # pylint: disable=no-member
-            browser = self._current_browser()
-            try:
-                # pylint: disable=no-member
-                WebDriverWait(None, timeout, self._poll_frequency).\
-                    until_not(staleness_of(browser.find_element_by_tag_name('html')), '')
-            except:
-                # instead of halting the process because document is not ready
-                # in <TIMEOUT>, we try our luck...
-                # pylint: disable=no-member
-                self._debug(exc_info()[0])
-            try:
-                # pylint: disable=no-member
-                WebDriverWait(browser, timeout, self._poll_frequency).\
-                    until(lambda driver: driver.
-                          execute_async_script(self._page_ready_bootstrap), '')
-            except:
-                # instead of halting the process because document is not ready
-                # in <TIMEOUT>, we try our luck...
-                self._debug(exc_info()[0])
-            for keyword in self._page_ready_keyword_list:
-                # pylint: disable=no-member
-                self._builtin.run_keyword(keyword)
+            self._builtin.run_keyword(keyword)
+        return response

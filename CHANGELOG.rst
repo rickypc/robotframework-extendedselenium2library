@@ -1,3 +1,8 @@
+0.7.0 (2016.01.31)
+==================
+
+* Different approach of waiting to bring speed improvement
+
 0.6.2 (2016.01.10)
 ==================
 

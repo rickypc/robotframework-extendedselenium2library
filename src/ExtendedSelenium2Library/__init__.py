@@ -21,7 +21,6 @@
 Extended Selenium2 Library - a web testing library with AngularJS support.
 """
 
-from sys import exc_info
 from robot.libraries.BuiltIn import BuiltIn
 from Selenium2Library import Selenium2Library
 from ExtendedSelenium2Library.decorators import inherit_docs
@@ -167,55 +166,46 @@ class ExtendedSelenium2Library(Selenium2Library, ExtendedJavascriptKeywords,
         self._element_finder = ExtendedElementFinder()
         self._implicit_wait_in_secs = float(implicit_wait) if implicit_wait is not None else 15.0
         self._page_ready_keyword_list = []
-        jquery_bootstrap = self.JQUERY_BOOTSTRAP % \
-            {'jquery_url': self.JQUERY_URL} if self._ensure_jq else ''
-        self._page_ready_bootstrap = self.PAGE_READY_WRAPPER % \
-            {'jquery_bootstrap': jquery_bootstrap}
         self._table_element_finder._element_finder = self._element_finder  # pylint: disable=protected-access
 
     # pylint: disable=arguments-differ
+    # pylint: disable=missing-docstring
     def click_button(self, locator, skip_ready=False):
-        self._scroll_into_view(locator)
-        super(ExtendedSelenium2Library, self).click_button(locator)
+        element = self._scroll_into_view(locator)
+        super(ExtendedSelenium2Library, self).click_button(element)
         if not skip_ready:
             self._wait_until_page_ready()
-            self.wait_until_angular_ready()
 
     def click_element(self, locator, skip_ready=False):
-        self._scroll_into_view(locator)
-        super(ExtendedSelenium2Library, self).click_element(locator)
+        element = self._scroll_into_view(locator)
+        super(ExtendedSelenium2Library, self).click_element(element)
         if not skip_ready:
             self._wait_until_page_ready()
-            self.wait_until_angular_ready()
 
     def click_element_at_coordinates(self, locator, xoffset, yoffset, skip_ready=False):
-        self._scroll_into_view(locator)
+        element = self._scroll_into_view(locator)
         super(ExtendedSelenium2Library, self). \
-            click_element_at_coordinates(locator, xoffset, yoffset)
+            click_element_at_coordinates(element, xoffset, yoffset)
         if not skip_ready:
             self._wait_until_page_ready()
-            self.wait_until_angular_ready()
 
     def click_image(self, locator, skip_ready=False):
-        self._scroll_into_view(locator)
-        super(ExtendedSelenium2Library, self).click_image(locator)
+        element = self._scroll_into_view(locator)
+        super(ExtendedSelenium2Library, self).click_image(element)
         if not skip_ready:
             self._wait_until_page_ready()
-            self.wait_until_angular_ready()
 
     def click_link(self, locator, skip_ready=False):
-        self._scroll_into_view(locator)
-        super(ExtendedSelenium2Library, self).click_link(locator)
+        element = self._scroll_into_view(locator)
+        super(ExtendedSelenium2Library, self).click_link(element)
         if not skip_ready:
             self._wait_until_page_ready()
-            self.wait_until_angular_ready()
 
     def double_click_element(self, locator, skip_ready=False):
-        self._scroll_into_view(locator)
-        super(ExtendedSelenium2Library, self).double_click_element(locator)
+        element = self._scroll_into_view(locator)
+        super(ExtendedSelenium2Library, self).double_click_element(element)
         if not skip_ready:
             self._wait_until_page_ready()
-            self.wait_until_angular_ready()
 
     def element_attribute_should_contain(self, attribute_locator, expected, message=''):
         """Verifies element attribute identified by ``attribute_locator`` contains ``expected``.
@@ -271,11 +261,9 @@ class ExtendedSelenium2Library(Selenium2Library, ExtendedJavascriptKeywords,
 
     def get_location(self):
         # AngularJS support
-        script = self.NG_WRAPPER % {'prefix': 'var cb=arguments[arguments.length-1];'
-                                              'if(window.angular){',
-                                    'handler': 'function(){cb(document.location.href)}',
-                                    'suffix': '}else{cb(document.location.href)}'}
-        return self._current_browser().execute_async_script(script)
+        return self._wait_until_page_ready(handler='function(){cb(document.location.href)}',
+                                           suffix='}else{cb(document.location.href)}',
+                                           timeout=self._timeout_in_secs)
 
     def is_element_visible(self, locator):
         """Returns element visibility identified by ``locator``.
@@ -297,7 +285,6 @@ class ExtendedSelenium2Library(Selenium2Library, ExtendedJavascriptKeywords,
             open_browser(url, browser, alias, remote_url, desired_capabilities, ff_profile_dir)
         if not skip_ready:
             self._wait_until_page_ready()
-            self.wait_until_angular_ready()
         return index
 
     def register_page_ready_keyword(self, keyword_name):
@@ -323,8 +310,9 @@ class ExtendedSelenium2Library(Selenium2Library, ExtendedJavascriptKeywords,
         self._page_ready_keyword_list.remove(keyword_name)
 
     def select_all_from_list(self, locator):
-        super(ExtendedSelenium2Library, self).select_all_from_list(locator)
-        self._element_trigger_change(locator)
+        element = self._element_find(locator, True, True, 'select')
+        super(ExtendedSelenium2Library, self).select_all_from_list(element)
+        self._element_trigger_change(element)
 
     def select_checkbox(self, locator):
         self._info("Selecting checkbox '%s'." % locator)
@@ -333,20 +321,24 @@ class ExtendedSelenium2Library(Selenium2Library, ExtendedJavascriptKeywords,
             self._select_checkbox_or_radio_button(element)
 
     def select_from_list(self, locator, *items):
-        super(ExtendedSelenium2Library, self).select_from_list(locator, *items)
-        self._element_trigger_change(locator)
+        element = self._element_find(locator, True, True, 'select')
+        super(ExtendedSelenium2Library, self).select_from_list(element, *items)
+        self._element_trigger_change(element)
 
     def select_from_list_by_index(self, locator, *indexes):
-        super(ExtendedSelenium2Library, self).select_from_list_by_index(locator, *indexes)
-        self._element_trigger_change(locator)
+        element = self._element_find(locator, True, True, 'select')
+        super(ExtendedSelenium2Library, self).select_from_list_by_index(element, *indexes)
+        self._element_trigger_change(element)
 
     def select_from_list_by_label(self, locator, *labels):
-        super(ExtendedSelenium2Library, self).select_from_list_by_label(locator, *labels)
-        self._element_trigger_change(locator)
+        element = self._element_find(locator, True, True, 'select')
+        super(ExtendedSelenium2Library, self).select_from_list_by_label(element, *labels)
+        self._element_trigger_change(element)
 
     def select_from_list_by_value(self, locator, *values):
-        super(ExtendedSelenium2Library, self).select_from_list_by_value(locator, *values)
-        self._element_trigger_change(locator)
+        element = self._element_find(locator, True, True, 'select')
+        super(ExtendedSelenium2Library, self).select_from_list_by_value(element, *values)
+        self._element_trigger_change(element)
 
     def select_radio_button(self, group_name, value):
         self._info("Selecting '%s' from radio button '%s'." % (value, group_name))
@@ -355,44 +347,17 @@ class ExtendedSelenium2Library(Selenium2Library, ExtendedJavascriptKeywords,
             self._select_checkbox_or_radio_button(element)
 
     def submit_form(self, locator=None, skip_ready=False):
-        self._scroll_into_view(locator)
-        super(ExtendedSelenium2Library, self).submit_form(locator)
+        element = self._scroll_into_view(locator)
+        super(ExtendedSelenium2Library, self).submit_form(element)
         if not skip_ready:
             self._wait_until_page_ready()
-            self.wait_until_angular_ready()
 
-    def _angular_select_checkbox_or_radio_button(self, element, skip_ready=False):
-        """Select checkbox or radio button when AngularJS is ready."""
-        if element is None:
-            raise AssertionError("Element not found.")
-        # you will operating in different scope
-        script = self.NG_WRAPPER % {'prefix': 'var obj=arguments[0];',
-                                    'handler': 'function(){angular.element(obj).'
-                                               'prop(\'checked\',true).triggerHandler(\'click\')}',
-                                    'suffix': ''}
-        self._current_browser().execute_script(script, element)
-        if not skip_ready:
-            self._wait_until_page_ready()
-            self.wait_until_angular_ready()
-
-    def _element_trigger_change(self, locator, skip_ready=False):
+    def _element_trigger_change(self, element):
         """Trigger change event on target element when AngularJS is ready."""
-        element = self._element_find(locator, True, True)
-        if element is None:
-            raise AssertionError("Element '%s' not found." % locator)
-        if self._is_angular_control(element):
-            # you will operating in different scope
-            script = self.NG_WRAPPER % {'prefix': 'var obj=arguments[0];',
-                                        'handler': 'function(){$(obj).trigger(\'change\').'
-                                                   'trigger(\'focusout\')}',
-                                        'suffix': ''}
-            self._current_browser().execute_script(script, element)
-            if not skip_ready:
-                self._wait_until_page_ready()
-                self.wait_until_angular_ready()
-        else:
-            if not skip_ready:
-                self._wait_until_page_ready()
+        self._wait_until_page_ready(element,
+                                    skip_stale_check=True,
+                                    prefix='var cb=arguments[arguments.length-1];var el=arguments[0];if(window.angular){',
+                                    handler='function(){$(el).trigger(\'change\').trigger(\'focusout\');cb(true)}')
 
     def _get_browser_name(self):
         """Returns current browser name."""
@@ -400,29 +365,16 @@ class ExtendedSelenium2Library(Selenium2Library, ExtendedJavascriptKeywords,
 
     def _input_text_into_text_field(self, locator, text, skip_ready=False):
         """Send keys to text field with AngularJS synchronization."""
-        super(ExtendedSelenium2Library, self)._input_text_into_text_field(locator, text)
         element = self._element_find(locator, True, True)
-        if self._is_angular_control(element):
-            if not skip_ready:
-                self._wait_until_page_ready()
-                self.wait_until_angular_ready()
-
-    def _is_angular_control(self, element):
-        """Returns true if target element is an AngularJS control, otherwise false."""
-        if self._is_angular_page():
-            return element.get_attribute('data-ng-model') != '' \
-                or element.get_attribute('ng-model') != ''
-        else:
-            return False
-
-    def _is_angular_page(self):
-        """Returns true if current page is an AngularJS page, otherwise false."""
-        script = 'return !!window.angular'
-        try:
-            return self._current_browser().execute_script(script)
-        except:
-            self._debug(exc_info()[0])
-            return False
+        if element is None:
+            raise AssertionError("Element '%s' not found." % locator)
+        element.clear()
+        element.send_keys(text)
+        if not skip_ready:
+            self._wait_until_page_ready(element,
+                                        skip_stale_check=True,
+                                        prefix='var cb=arguments[arguments.length-1];var el=arguments[0];if(window.angular){',
+                                        handler='function(){$(el).trigger(\'change\').trigger(\'focusout\');cb(true)}')
 
     def _is_internet_explorer(self, browser_name=None):
         """Returns true if current browser is Internet Explorer."""
@@ -432,18 +384,20 @@ class ExtendedSelenium2Library(Selenium2Library, ExtendedJavascriptKeywords,
 
     def _scroll_into_view(self, locator):
         """Scroll target element into view. (Internet Explorer only)."""
+        element = self._element_find(locator, True, True)
         if self._is_internet_explorer():
-            element = self._element_find(locator, True, True)
             if element is None:
                 raise AssertionError("Element '%s' not found." % locator)
             script = 'arguments[0].scrollIntoView(false)'
             self._current_browser().execute_script(script, element)
+        return element
 
-    def _select_checkbox_or_radio_button(self, element, skip_ready=False):
+    def _select_checkbox_or_radio_button(self, element):
         """Select checkbox or radio button with AngularJS support."""
-        if self._is_angular_control(element):
-            self._angular_select_checkbox_or_radio_button(element)
-        else:
-            element.click()
-            if not skip_ready:
-                self._wait_until_page_ready()
+        if element is None:
+            raise AssertionError("Element not found.")
+        self._wait_until_page_ready(element,
+                                    skip_stale_check=True,
+                                    prefix='var cb=arguments[arguments.length-1];var el=arguments[0];if(window.angular){',
+                                    handler='function(){angular.element(el).prop(\'checked\',true).triggerHandler(\'click\');cb(true)}',
+                                    suffix='}else{el.click();cb(false)}')
