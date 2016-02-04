@@ -63,11 +63,12 @@ class ExtendedWaitingKeywords(_WaitingKeywords):
             error = "Condition '%s' did not become true in %s" % \
                 (condition, self._format_timeout(timeout))
         # pylint: disable=no-member
-        WebDriverWait(self._current_browser(), timeout, self._poll_frequency).\
+        WebDriverWait(self._current_browser(), timeout, self._inputs['poll_frequency']).\
             until(lambda driver: driver.execute_async_script(condition), error)
 
     def wait_for_condition_with_replaced_variables(self, condition, timeout=None, error=None):
-        """Replace variables and waits until the given ``condition`` is true or ``timeout`` expires.
+        """Replace variables and waits until the given ``condition`` is true or
+        ``timeout`` expires.
 
         Arguments:
         - ``condition``: The ``condition`` can be arbitrary JavaScript expression but must contain
@@ -95,7 +96,7 @@ class ExtendedWaitingKeywords(_WaitingKeywords):
             error = "Condition '%s' did not become true in %s" % \
                 (condition, self._format_timeout(timeout))
         # pylint: disable=no-member
-        WebDriverWait(self, timeout, self._poll_frequency).\
+        WebDriverWait(self, timeout, self._inputs['poll_frequency']).\
             until(lambda driver:
                   driver.execute_javascript_with_replaced_variables(condition) is True, error)
 
@@ -142,7 +143,8 @@ class ExtendedWaitingKeywords(_WaitingKeywords):
         timeout = self._get_timeout_value(timeout, self._implicit_wait_in_secs)
         if not error:
             error = 'AngularJS is not ready in %s' % self._format_timeout(timeout)
-        # we add more validation here to support transition between AngularJs to non AngularJS page.
+        # we add more validation here to support transition
+        # between AngularJs to non AngularJS page.
         # pylint: disable=no-member
         script = self.NG_WRAPPER % {'prefix': 'var cb=arguments[arguments.length-1];'
                                               'if(window.angular){',
@@ -152,7 +154,7 @@ class ExtendedWaitingKeywords(_WaitingKeywords):
         browser = self._current_browser()
         browser.set_script_timeout(timeout)
         try:
-            WebDriverWait(browser, timeout, self._poll_frequency).\
+            WebDriverWait(browser, timeout, self._inputs['poll_frequency']).\
                 until(lambda driver: driver.execute_async_script(script), error)
         except TimeoutException:
             # prevent double wait
@@ -160,9 +162,9 @@ class ExtendedWaitingKeywords(_WaitingKeywords):
         except:
             self._debug(exc_info()[0])
             # still inflight, second chance. let the browser take a deep breath...
-            sleep(self._browser_breath_delay)
+            sleep(self._inputs['browser_breath_delay'])
             try:
-                WebDriverWait(browser, timeout, self._poll_frequency).\
+                WebDriverWait(browser, timeout, self._inputs['poll_frequency']).\
                     until(lambda driver: driver.execute_async_script(script), error)
             except:
                 # instead of halting the process because AngularJS is not ready
@@ -203,7 +205,7 @@ class ExtendedWaitingKeywords(_WaitingKeywords):
             error = "Element did not contain attribute '%s' after %s" %\
                     (expected, self._format_timeout(timeout))
         # pylint: disable=no-member
-        WebDriverWait(self, timeout, self._poll_frequency).\
+        WebDriverWait(self, timeout, self._inputs['poll_frequency']).\
             until(lambda driver: expected in driver.get_element_attribute(attribute_locator),
                   error)
 
@@ -237,7 +239,7 @@ class ExtendedWaitingKeywords(_WaitingKeywords):
             error = "Element was still contain attribute '%s' after %s" %\
                     (unexpected, self._format_timeout(timeout))
         # pylint: disable=no-member
-        WebDriverWait(self, timeout, self._poll_frequency).\
+        WebDriverWait(self, timeout, self._inputs['poll_frequency']).\
             until_not(lambda driver: unexpected in driver.get_element_attribute(attribute_locator),
                       error)
 
@@ -251,7 +253,8 @@ class ExtendedWaitingKeywords(_WaitingKeywords):
         element = self._element_find(locator, True, True)
         if element is None:
             raise AssertionError("Element '%s' not found." % locator)
-        WebDriverWait(None, timeout, self._poll_frequency).until_not(visibility_of(element), error)
+        WebDriverWait(None, timeout, self._inputs['poll_frequency']).\
+            until_not(visibility_of(element), error)
 
     def wait_until_element_is_visible(self, locator, timeout=None, error=None):
         # pylint: disable=no-member
@@ -262,7 +265,8 @@ class ExtendedWaitingKeywords(_WaitingKeywords):
         element = self._element_find(locator, True, True)
         if element is None:
             raise AssertionError("Element '%s' not found." % locator)
-        WebDriverWait(None, timeout, self._poll_frequency).until(visibility_of(element), error)
+        WebDriverWait(None, timeout, self._inputs['poll_frequency']).\
+            until(visibility_of(element), error)
 
     def wait_until_location_contains(self, expected, timeout=None, error=None):
         """Waits until current URL contains ``expected``.
@@ -287,7 +291,7 @@ class ExtendedWaitingKeywords(_WaitingKeywords):
         if not error:
             error = "Location did not contain '%s' after %s" %\
                     (expected, self._format_timeout(timeout))
-        WebDriverWait(self, timeout, self._poll_frequency).\
+        WebDriverWait(self, timeout, self._inputs['poll_frequency']).\
             until(lambda driver: expected in driver.get_location(), error)
 
     def wait_until_location_does_not_contain(self, unexpected, timeout=None, error=None):
@@ -313,7 +317,7 @@ class ExtendedWaitingKeywords(_WaitingKeywords):
         if not error:
             error = "Location was still contain '%s' after %s" %\
                     (unexpected, self._format_timeout(timeout))
-        WebDriverWait(self, timeout, self._poll_frequency).\
+        WebDriverWait(self, timeout, self._inputs['poll_frequency']).\
             until_not(lambda driver: unexpected in driver.get_location(), error)
 
     @staticmethod
@@ -324,14 +328,14 @@ class ExtendedWaitingKeywords(_WaitingKeywords):
     def _wait_until_html_ready(self, browser, timeout):
         """Wait until HTML is ready by using stale check."""
         # pylint: disable=no-member
-        delay = self._browser_breath_delay
+        delay = self._inputs['browser_breath_delay']
         if delay < 1:
             delay *= 10
         # let the browser take a deep breath...
         sleep(delay)
         try:
             # pylint: disable=no-member
-            WebDriverWait(None, timeout, self._poll_frequency).\
+            WebDriverWait(None, timeout, self._inputs['poll_frequency']).\
                 until_not(staleness_of(browser.find_element_by_tag_name('html')), '')
         except:
             # instead of halting the process because document is not ready
@@ -341,16 +345,19 @@ class ExtendedWaitingKeywords(_WaitingKeywords):
 
     def _wait_until_page_ready(self, *args, **kwargs):
         """Semi blocking API that incorporated different strategies for cross-browser support."""
-        response = kwargs.pop('default', None)
+        responses = {
+            'page_ready_keywords': [],
+            'response': kwargs.pop('default', None)
+        }
         # pylint: disable=no-member
-        if not self._block_until_page_ready:
-            return response
+        if not self._inputs['block_until_page_ready']:
+            return responses
         # pylint: disable=no-member
         browser = kwargs.pop('browser', self._current_browser())
         prefix = kwargs.pop('prefix', 'var cb=arguments[arguments.length-1];if(window.angular){')
         skip_stale_check = bool(kwargs.pop('skip_stale_check', False))
         # pylint: disable=no-member
-        if self._ensure_jq and not skip_stale_check:
+        if self._inputs['ensure_jq'] and not skip_stale_check:
             # only during possible page re-load/re-route
             jquery_bootstrap = self.JQUERY_BOOTSTRAP % {'jquery_url': self.JQUERY_URL}
             prefix = 'if(!window.jQuery){%(jquery_bootstrap)s}%(prefix)s' % \
@@ -360,21 +367,34 @@ class ExtendedWaitingKeywords(_WaitingKeywords):
                                     'handler': kwargs.pop('handler', 'function(){cb(true)}'),
                                     'suffix': kwargs.pop('suffix', '}else{cb(false)}')}
         # pylint: disable=no-member
-        timeout = self._get_timeout_value(kwargs.pop('timeout', None), self._implicit_wait_in_secs)
+        default_timeout = self._implicit_wait_in_secs if skip_stale_check \
+            else self._timeout_in_secs
+        # pylint: disable=no-member
+        timeout = self._get_timeout_value(kwargs.pop('timeout', None), default_timeout)
         if not skip_stale_check:
             self._wait_until_html_ready(browser, timeout)
+        responses['response'] = self._wait_until_script_ready(browser, timeout, script, *args)
+        # pylint: disable=no-member
+        responses['page_ready_keywords'] = [self._builtin.run_keyword(keyword)
+                                            for keyword in self._page_ready_keyword_list]
+        return responses
+
+    def _wait_until_script_ready(self, browser, timeout, script, *args):
+        response = None
+        # pylint: disable=no-member
+        selenium_timeout = self._timeout_in_secs
         try:
-            if timeout != self._timeout_in_secs:
+            # pylint: disable=no-member
+            if timeout != selenium_timeout:
                 browser.set_script_timeout(timeout)
             response = browser.execute_async_script(script, *args)
         except TimeoutException:
             # instead of halting the process because document is not ready
             # in <TIMEOUT>, we try our luck...
+            # pylint: disable=no-member
             self._debug(exc_info()[0])
         finally:
-            if timeout != self._timeout_in_secs:
-                browser.set_script_timeout(self._timeout_in_secs)
-        for keyword in self._page_ready_keyword_list:
-            # pylint: disable=no-member
-            self._builtin.run_keyword(keyword)
+            if timeout != selenium_timeout:
+                # pylint: disable=no-member
+                browser.set_script_timeout(selenium_timeout)
         return response

@@ -1,3 +1,11 @@
+0.7.1 (2016.02.03)
+==================
+
+* Add default timeout for ``_wait_until_page_ready``
+* Refactor ``_wait_until_page_ready`` to reduce its complexity
+* Include page ready keywords return values as part of ``_wait_until_page_ready`` return value
+* Follow lint suggestion
+
 0.7.0 (2016.01.31)
 ==================
 

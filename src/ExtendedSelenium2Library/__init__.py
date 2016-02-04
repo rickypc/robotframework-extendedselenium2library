@@ -155,18 +155,21 @@ class ExtendedSelenium2Library(Selenium2Library, ExtendedJavascriptKeywords,
         | Library `|` ExtendedSelenium2Library `|` timeout=10      `|` run_on_failure=Nothing    | # Sets default timeout to 10 seconds and does nothing on failure           |
         """
         # pylint: disable=line-too-long
-        self._block_until_page_ready = bool(kwargs.pop('block_until_page_ready', True))
-        self._browser_breath_delay = float(kwargs.pop('browser_breath_delay', 0.05))
+        self._inputs = {
+            'block_until_page_ready': bool(kwargs.pop('block_until_page_ready', True)),
+            'browser_breath_delay': float(kwargs.pop('browser_breath_delay', 0.05)),
+            'ensure_jq': bool(kwargs.pop('ensure_jq', True)),
+            'poll_frequency': float(kwargs.pop('poll_frequency', 0.2)),
+        }
         self._builtin = BuiltIn()
-        self._ensure_jq = bool(kwargs.pop('ensure_jq', True))
-        self._poll_frequency = float(kwargs.pop('poll_frequency', 0.2))
         Selenium2Library.__init__(self, implicit_wait=implicit_wait, **kwargs)
         ExtendedJavascriptKeywords.__init__(self)
         ExtendedWaitingKeywords.__init__(self)
         self._element_finder = ExtendedElementFinder()
         self._implicit_wait_in_secs = float(implicit_wait) if implicit_wait is not None else 15.0
         self._page_ready_keyword_list = []
-        self._table_element_finder._element_finder = self._element_finder  # pylint: disable=protected-access
+        # pylint: disable=protected-access
+        self._table_element_finder._element_finder = self._element_finder
 
     # pylint: disable=arguments-differ
     # pylint: disable=missing-docstring
@@ -262,8 +265,7 @@ class ExtendedSelenium2Library(Selenium2Library, ExtendedJavascriptKeywords,
     def get_location(self):
         # AngularJS support
         return self._wait_until_page_ready(handler='function(){cb(document.location.href)}',
-                                           suffix='}else{cb(document.location.href)}',
-                                           timeout=self._timeout_in_secs)
+                                           suffix='}else{cb(document.location.href)}')['response']
 
     def is_element_visible(self, locator):
         """Returns element visibility identified by ``locator``.
@@ -356,8 +358,10 @@ class ExtendedSelenium2Library(Selenium2Library, ExtendedJavascriptKeywords,
         """Trigger change event on target element when AngularJS is ready."""
         self._wait_until_page_ready(element,
                                     skip_stale_check=True,
-                                    prefix='var cb=arguments[arguments.length-1];var el=arguments[0];if(window.angular){',
-                                    handler='function(){$(el).trigger(\'change\').trigger(\'focusout\');cb(true)}')
+                                    prefix='var cb=arguments[arguments.length-1];'
+                                           'var el=arguments[0];if(window.angular){',
+                                    handler='function(){$(el).trigger(\'change\').'
+                                            'trigger(\'focusout\');cb(true)}')
 
     def _get_browser_name(self):
         """Returns current browser name."""
@@ -373,8 +377,10 @@ class ExtendedSelenium2Library(Selenium2Library, ExtendedJavascriptKeywords,
         if not skip_ready:
             self._wait_until_page_ready(element,
                                         skip_stale_check=True,
-                                        prefix='var cb=arguments[arguments.length-1];var el=arguments[0];if(window.angular){',
-                                        handler='function(){$(el).trigger(\'change\').trigger(\'focusout\');cb(true)}')
+                                        prefix='var cb=arguments[arguments.length-1];'
+                                               'var el=arguments[0];if(window.angular){',
+                                        handler='function(){$(el).trigger(\'change\').'
+                                                'trigger(\'focusout\');cb(true)}')
 
     def _is_internet_explorer(self, browser_name=None):
         """Returns true if current browser is Internet Explorer."""
@@ -398,6 +404,9 @@ class ExtendedSelenium2Library(Selenium2Library, ExtendedJavascriptKeywords,
             raise AssertionError("Element not found.")
         self._wait_until_page_ready(element,
                                     skip_stale_check=True,
-                                    prefix='var cb=arguments[arguments.length-1];var el=arguments[0];if(window.angular){',
-                                    handler='function(){angular.element(el).prop(\'checked\',true).triggerHandler(\'click\');cb(true)}',
+                                    prefix='var cb=arguments[arguments.length-1];'
+                                           'var el=arguments[0];if(window.angular){',
+                                    handler='function(){angular.element(el).'
+                                            'prop(\'checked\',true).triggerHandler(\'click\');'
+                                            'cb(true)}',
                                     suffix='}else{el.click();cb(false)}')

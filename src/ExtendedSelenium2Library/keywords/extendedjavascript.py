@@ -149,7 +149,8 @@ class ExtendedJavascriptKeywords(_JavaScriptKeywords):
             self._warn(message)
 
     def _replace_variables_in_javascript_code(self, code):
-        """Replace all variables in the given JavaScript ``code`` for later JavaScript execution."""
+        """Replace all variables in the given JavaScript ``code``
+        for later JavaScript execution."""
         # pylint: disable=no-member
         code = self._builtin.replace_variables(code)
         code = sub(r'(False|True)', lambda match: match.group(1).lower(), code)
