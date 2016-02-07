@@ -47,10 +47,11 @@ setup(
     license='AGPL 3',
     classifiers=[
         'Development Status :: 4 - Beta',
+        'Framework :: Robot Framework',
         'Intended Audience :: Developers',
-        'Topic :: Software Development :: Testing',
         'License :: OSI Approved :: GNU Affero General Public License v3',
         'Programming Language :: Python :: 2.7',
+        'Topic :: Software Development :: Testing',
     ],
     keywords='robot framework extended testing automation selenium selenium2 webdriver web '
              'protractor angular angularjs angular.js javascript karma webdev softwaretesting',

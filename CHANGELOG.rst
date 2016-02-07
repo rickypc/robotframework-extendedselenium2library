@@ -1,3 +1,11 @@
+0.7.2 (2016.02.07)
+==================
+
+* Add ``Scroll Element Into View`` keyword
+* Using locator instead of element to prevent stale exception in ``_wait_until_page_ready``
+* Using locator position to indicate the argument type
+* Add new classifier Framework :: Robot Framework
+
 0.7.1 (2016.02.03)
 ==================
 

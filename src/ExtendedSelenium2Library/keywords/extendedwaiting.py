@@ -354,6 +354,7 @@ class ExtendedWaitingKeywords(_WaitingKeywords):
             return responses
         # pylint: disable=no-member
         browser = kwargs.pop('browser', self._current_browser())
+        locator_position = int(kwargs.pop('locator_position', -1))
         prefix = kwargs.pop('prefix', 'var cb=arguments[arguments.length-1];if(window.angular){')
         skip_stale_check = bool(kwargs.pop('skip_stale_check', False))
         # pylint: disable=no-member
@@ -371,6 +372,9 @@ class ExtendedWaitingKeywords(_WaitingKeywords):
             else self._timeout_in_secs
         # pylint: disable=no-member
         timeout = self._get_timeout_value(kwargs.pop('timeout', None), default_timeout)
+        if locator_position > -1:
+            args = list(args)
+            args[locator_position] = self._element_find(args[locator_position], True, True)
         if not skip_stale_check:
             self._wait_until_html_ready(browser, timeout)
         responses['response'] = self._wait_until_script_ready(browser, timeout, script, *args)
