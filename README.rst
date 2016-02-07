@@ -158,7 +158,7 @@ That's it! Thank you for your contribution!
 License
 -------
 
-Copyright (c) 2015-2016 Richard Huang.
+Copyright (c) 2015, 2016 Richard Huang.
 
 This library is free software, licensed under: `GNU Affero General Public License (AGPL-3.0)`_.
 
