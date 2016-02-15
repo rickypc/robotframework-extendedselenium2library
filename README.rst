@@ -119,6 +119,12 @@ doc/
 src/
     Python source code
 
+test/
+     Test files
+
+     utest/
+           Python unit test
+
 Usage
 -----
 
@@ -143,6 +149,15 @@ The `Keyword Documentation`_ can be found online, if you need to generate the ke
 .. code:: console
 
     make doc
+
+Run Unit Tests, and Test Coverage Report
+----------------------------------------
+
+Test the testing library, talking about dogfooding, let's run:
+
+.. code:: console
+
+    make test
 
 Contributing
 ------------

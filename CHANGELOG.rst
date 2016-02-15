@@ -1,3 +1,10 @@
+0.8.0 (2016.02.14)
+==================
+
+* Refactor element related operation into its own module
+* Using type check to validate the value instead of locator position
+* Add unit tests
+
 0.7.2 (2016.02.07)
 ==================
 

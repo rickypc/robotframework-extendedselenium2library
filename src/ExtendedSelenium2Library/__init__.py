@@ -24,9 +24,9 @@ Extended Selenium2 Library - a web testing library with AngularJS support.
 from robot.libraries.BuiltIn import BuiltIn
 from Selenium2Library import Selenium2Library
 from ExtendedSelenium2Library.decorators import inherit_docs
+from ExtendedSelenium2Library.keywords import ExtendedElementKeywords
 from ExtendedSelenium2Library.keywords import ExtendedJavascriptKeywords
 from ExtendedSelenium2Library.keywords import ExtendedWaitingKeywords
-from ExtendedSelenium2Library.locators import ExtendedElementFinder
 from ExtendedSelenium2Library.version import get_version
 
 __version__ = get_version()
@@ -34,8 +34,8 @@ __version__ = get_version()
 
 # pylint: disable=too-many-ancestors
 @inherit_docs
-class ExtendedSelenium2Library(Selenium2Library, ExtendedJavascriptKeywords,
-                               ExtendedWaitingKeywords):
+class ExtendedSelenium2Library(Selenium2Library, ExtendedElementKeywords,
+                               ExtendedJavascriptKeywords, ExtendedWaitingKeywords):
     # pylint: disable=line-too-long
     """ExtendedSelenium2Library is a [http://goo.gl/boVQia|Selenium2 (WebDriver)]
     web testing library with [https://goo.gl/Kzz8Y3|AngularJS] support and
@@ -164,9 +164,9 @@ class ExtendedSelenium2Library(Selenium2Library, ExtendedJavascriptKeywords,
         }
         self._builtin = BuiltIn()
         Selenium2Library.__init__(self, implicit_wait=implicit_wait, **kwargs)
+        ExtendedElementKeywords.__init__(self)
         ExtendedJavascriptKeywords.__init__(self)
         ExtendedWaitingKeywords.__init__(self)
-        self._element_finder = ExtendedElementFinder()
         self._implicit_wait_in_secs = float(implicit_wait) if implicit_wait is not None else 15.0
         self._page_ready_keyword_list = []
         # pylint: disable=protected-access
@@ -179,78 +179,6 @@ class ExtendedSelenium2Library(Selenium2Library, ExtendedJavascriptKeywords,
         super(ExtendedSelenium2Library, self).click_button(element)
         if not skip_ready:
             self._wait_until_page_ready()
-
-    def click_element(self, locator, skip_ready=False):
-        element = self._scroll_into_view_on_internet_explorer(locator)
-        super(ExtendedSelenium2Library, self).click_element(element)
-        if not skip_ready:
-            self._wait_until_page_ready()
-
-    def click_element_at_coordinates(self, locator, xoffset, yoffset, skip_ready=False):
-        element = self._scroll_into_view_on_internet_explorer(locator)
-        super(ExtendedSelenium2Library, self). \
-            click_element_at_coordinates(element, xoffset, yoffset)
-        if not skip_ready:
-            self._wait_until_page_ready()
-
-    def click_image(self, locator, skip_ready=False):
-        element = self._scroll_into_view_on_internet_explorer(locator)
-        super(ExtendedSelenium2Library, self).click_image(element)
-        if not skip_ready:
-            self._wait_until_page_ready()
-
-    def click_link(self, locator, skip_ready=False):
-        element = self._scroll_into_view_on_internet_explorer(locator)
-        super(ExtendedSelenium2Library, self).click_link(element)
-        if not skip_ready:
-            self._wait_until_page_ready()
-
-    def double_click_element(self, locator, skip_ready=False):
-        element = self._scroll_into_view_on_internet_explorer(locator)
-        super(ExtendedSelenium2Library, self).double_click_element(element)
-        if not skip_ready:
-            self._wait_until_page_ready()
-
-    def element_attribute_should_contain(self, attribute_locator, expected, message=''):
-        """Verifies element attribute identified by ``attribute_locator`` contains ``expected``.
-
-        Arguments:
-        - ``attribute_locator``: The locator to find requested element attribute. It consists of
-                                 element locator followed by an @ sign and attribute name,
-                                 for example "element_id@class".
-        - ``expected``: The expected element attribute value.
-        - ``message``: The value that would be use to override the default error message.
-
-        Examples:
-        | Element Attribute Should Contain | css=div.class@class | value |
-        """
-        actual = self.get_element_attribute(attribute_locator)
-        if expected not in actual:
-            if not message:
-                message = "Element attribute '%s' should have contained '%s'" \
-                          " but its value was '%s'." % (attribute_locator, expected, actual)
-            raise AssertionError(message)
-
-    def element_attribute_should_not_contain(self, attribute_locator, unexpected, message=''):
-        """Verifies element attribute identified by ``attribute_locator``
-        does not contain ``unexpected``.
-
-        Arguments:
-        - ``attribute_locator``: The locator to find requested element attribute. It consists of
-                                 element locator followed by an @ sign and attribute name,
-                                 for example "element_id@class".
-        - ``unexpected``: The unexpected element attribute value.
-        - ``message``: The value that would be use to override the default error message.
-
-        Examples:
-        | Element Attribute Should Not Contain | css=div.class@class | value |
-        """
-        actual = self.get_element_attribute(attribute_locator)
-        if unexpected in actual:
-            if not message:
-                message = "Element attribute '%s' should not contain '%s'" \
-                          " but it did." % (attribute_locator, unexpected)
-            raise AssertionError(message)
 
     def get_browser_logs(self):
         """Returns the Javascript console logs from the browser.
@@ -267,19 +195,6 @@ class ExtendedSelenium2Library(Selenium2Library, ExtendedJavascriptKeywords,
         # AngularJS support
         return self._wait_until_page_ready(handler='function(){cb(document.location.href)}',
                                            suffix='}else{cb(document.location.href)}')['response']
-
-    def is_element_visible(self, locator):
-        """Returns element visibility identified by ``locator``.
-
-        Arguments:
-        - ``locator``: The locator to find requested element. Key attributes for
-                       arbitrary elements are ``id`` and ``name``. See `introduction` for
-                       details about locating elements.
-
-        Examples:
-        | Is Element Visible | css=div.class |
-        """
-        return self._is_visible(locator)
 
     # pylint: disable=too-many-arguments
     def open_browser(self, url, browser='firefox', alias=None, remote_url=False,
@@ -311,24 +226,6 @@ class ExtendedSelenium2Library(Selenium2Library, ExtendedJavascriptKeywords,
         | Remove Page Ready Keyword | My Keyword |
         """
         self._page_ready_keyword_list.remove(keyword_name)
-
-    def scroll_element_into_view(self, locator):
-        """Scroll element from given ``locator`` into view.
-
-        Arguments:
-        - ``locator``: The locator to find requested element. Key attributes for
-                       arbitrary elements are ``id`` and ``name``. See `introduction` for
-                       details about locating elements.
-
-        Examples:
-        | Scroll Element Into View | css=div.class |
-        """
-        element = self._element_find(locator, True, True)
-        if element is None:
-            raise AssertionError("Element '%s' not found." % locator)
-        script = 'arguments[0].scrollIntoView()'
-        self._current_browser().execute_script(script, element)
-        return element
 
     def select_all_from_list(self, locator):
         element = self._element_find(locator, True, True, 'select')
@@ -377,16 +274,11 @@ class ExtendedSelenium2Library(Selenium2Library, ExtendedJavascriptKeywords,
     def _element_trigger_change(self, locator):
         """Trigger change event on target element when AngularJS is ready."""
         self._wait_until_page_ready(locator,
-                                    locator_position=0,
                                     skip_stale_check=True,
                                     prefix='var cb=arguments[arguments.length-1];'
                                            'var el=arguments[0];if(window.angular){',
                                     handler='function(){$(el).trigger(\'change\').'
                                             'trigger(\'focusout\');cb(true)}')
-
-    def _get_browser_name(self):
-        """Returns current browser name."""
-        return self._current_browser().capabilities['browserName'].strip().lower()
 
     def _input_text_into_text_field(self, locator, text, skip_ready=False):
         """Send keys to text field with AngularJS synchronization."""
@@ -397,33 +289,15 @@ class ExtendedSelenium2Library(Selenium2Library, ExtendedJavascriptKeywords,
         element.send_keys(text)
         if not skip_ready:
             self._wait_until_page_ready(locator,
-                                        locator_position=0,
                                         skip_stale_check=True,
                                         prefix='var cb=arguments[arguments.length-1];'
                                                'var el=arguments[0];if(window.angular){',
                                         handler='function(){$(el).trigger(\'change\').'
                                                 'trigger(\'focusout\');cb(true)}')
 
-    def _is_internet_explorer(self, browser_name=None):
-        """Returns true if current browser is Internet Explorer."""
-        if not browser_name:
-            browser_name = self._get_browser_name()
-        return browser_name == 'internetexplorer' or browser_name == 'ie'
-
-    def _scroll_into_view_on_internet_explorer(self, locator):
-        """Scroll target element into view. (Internet Explorer only)."""
-        element = self._element_find(locator, True, True)
-        if self._is_internet_explorer():
-            if element is None:
-                raise AssertionError("Element '%s' not found." % locator)
-            script = 'arguments[0].scrollIntoView(false)'
-            self._current_browser().execute_script(script, element)
-        return element
-
     def _select_checkbox_or_radio_button(self, locator):
         """Select checkbox or radio button with AngularJS support."""
         self._wait_until_page_ready(locator,
-                                    locator_position=0,
                                     skip_stale_check=True,
                                     prefix='var cb=arguments[arguments.length-1];'
                                            'var el=arguments[0];if(window.angular){',

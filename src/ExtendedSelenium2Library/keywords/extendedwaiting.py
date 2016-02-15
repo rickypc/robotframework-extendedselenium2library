@@ -25,6 +25,7 @@ from sys import exc_info
 from time import sleep
 from robot import utils
 from selenium.common.exceptions import TimeoutException
+from selenium.webdriver.remote.webelement import WebElement
 from selenium.webdriver.support.expected_conditions import staleness_of, visibility_of
 from selenium.webdriver.support.ui import WebDriverWait
 from Selenium2Library.keywords import _WaitingKeywords
@@ -354,7 +355,7 @@ class ExtendedWaitingKeywords(_WaitingKeywords):
             return responses
         # pylint: disable=no-member
         browser = kwargs.pop('browser', self._current_browser())
-        locator_position = int(kwargs.pop('locator_position', -1))
+        locator_position = int(kwargs.pop('locator_position', 0))
         prefix = kwargs.pop('prefix', 'var cb=arguments[arguments.length-1];if(window.angular){')
         skip_stale_check = bool(kwargs.pop('skip_stale_check', False))
         # pylint: disable=no-member
@@ -372,7 +373,7 @@ class ExtendedWaitingKeywords(_WaitingKeywords):
             else self._timeout_in_secs
         # pylint: disable=no-member
         timeout = self._get_timeout_value(kwargs.pop('timeout', None), default_timeout)
-        if locator_position > -1:
+        if len(args) > locator_position and not isinstance(args[locator_position], WebElement):
             args = list(args)
             args[locator_position] = self._element_find(args[locator_position], True, True)
         if not skip_stale_check:

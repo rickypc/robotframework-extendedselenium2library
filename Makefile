@@ -21,7 +21,7 @@ lc = $(subst A,a,$(subst B,b,$(subst C,c,$(subst D,d,$(subst E,e,$(subst F,f,$(s
 .PHONY: help
 
 help:
-	@echo targets: clean, clean_dist, version, lint, doc, github_doc, testpypi, pypi
+	@echo targets: clean, clean_dist, version, lint, test, doc, github_doc, testpypi, pypi
 
 clean:
 	python setup.py clean --all
@@ -44,6 +44,12 @@ lint:clean
  		src/$(LIBRARY_NAME)/decorators/*.py\
 		src/$(LIBRARY_NAME)/keywords/*.py\
  		src/$(LIBRARY_NAME)/locators/*.py
+
+test:test_unit
+
+test_unit:
+	PYTHONPATH=./src: coverage run --source=src -m unittest discover test/utest
+	coverage report
 
 doc:clean
 	python -m robot.libdoc src/$(LIBRARY_NAME) doc/$(LIBRARY_NAME).html

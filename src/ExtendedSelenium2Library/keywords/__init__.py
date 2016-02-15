@@ -21,10 +21,12 @@
 Extended Selenium2 Library - a web testing library with AngularJS support.
 """
 
+from ExtendedSelenium2Library.keywords.extendedelement import ExtendedElementKeywords
 from ExtendedSelenium2Library.keywords.extendedjavascript import ExtendedJavascriptKeywords
 from ExtendedSelenium2Library.keywords.extendedwaiting import ExtendedWaitingKeywords
 
 __all__ = [
+    'ExtendedElementKeywords',
     'ExtendedJavascriptKeywords',
     'ExtendedWaitingKeywords',
 ]
