@@ -193,8 +193,16 @@ class ExtendedSelenium2Library(Selenium2Library, ExtendedElementKeywords,
 
     def get_location(self):
         # AngularJS support
-        return self._wait_until_page_ready(handler='function(){cb(document.location.href)}',
-                                           suffix='}else{cb(document.location.href)}')['response']
+        response = self._wait_until_page_ready(handler='function(){cb(location.href)}',
+                                               suffix='}else{cb(location.href)}',
+                                               timeout=self._implicit_wait_in_secs)['response']
+        # retry with sync approach
+        if response is None:
+            response = self._current_browser().execute_script('return location.href')
+        # fallback
+        if response is None:
+            response = self._current_browser().get_current_url()
+        return response
 
     # pylint: disable=too-many-arguments
     def open_browser(self, url, browser='firefox', alias=None, remote_url=False,

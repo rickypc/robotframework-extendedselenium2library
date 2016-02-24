@@ -134,7 +134,7 @@ ExtendedSelenium2Library must be imported into your Robot test suite.
 .. code:: robotframework
 
     *** Settings ***
-    Library  ExtendedSelenium2Library
+    Library    ExtendedSelenium2Library
 
 See `Robot Framework User Guide`_ for more information.
 
