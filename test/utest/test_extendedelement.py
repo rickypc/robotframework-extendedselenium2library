@@ -170,7 +170,7 @@ class ExtendedElementTests(unittest.TestCase):
             self.element.element_attribute_should_contain(self.locator_attribute,
                                                           self.locator_class)
         self.element.get_element_attribute.assert_called_with(self.locator_attribute)
-        self.assertTrue(message in context.exception)
+        self.assertEqual(' '.join(context.exception.args).strip(), message)
 
     def test_element_attribute_should_raise_custom_message_exception(self):
         """Element attribute should raise exception with custom message."""
@@ -184,7 +184,7 @@ class ExtendedElementTests(unittest.TestCase):
                                                           self.locator_class,
                                                           message)
         self.element.get_element_attribute.assert_called_with(self.locator_attribute)
-        self.assertTrue(message in context.exception)
+        self.assertEqual(' '.join(context.exception.args).strip(), message)
 
     def test_element_attribute_should_not_contain(self):
         """Element attribute should not contain unexpected."""
@@ -205,7 +205,7 @@ class ExtendedElementTests(unittest.TestCase):
             self.element.element_attribute_should_not_contain(self.locator_attribute,
                                                               self.locator_class)
         self.element.get_element_attribute.assert_called_with(self.locator_attribute)
-        self.assertTrue(message in context.exception)
+        self.assertEqual(' '.join(context.exception.args).strip(), message)
 
     def test_element_attribute_not_contain_should_raise_custom_message_exception(self):
         """Element attribute not contain should raise exception with custom message."""
@@ -218,7 +218,7 @@ class ExtendedElementTests(unittest.TestCase):
                                                               self.locator_class,
                                                               message)
         self.element.get_element_attribute.assert_called_with(self.locator_attribute)
-        self.assertTrue(message in context.exception)
+        self.assertEqual(' '.join(context.exception.args).strip(), message)
 
     def test_is_element_visible(self):
         """Element should be visible."""
@@ -253,7 +253,7 @@ class ExtendedElementTests(unittest.TestCase):
         self.element._element_find.return_value = None
         with self.assertRaises(AssertionError) as context:
             self.assertIsNone(self.element.scroll_element_into_view(self.locator))
-        self.assertTrue(message in context.exception)
+        self.assertEqual(' '.join(context.exception.args).strip(), message)
         self.element._element_find.assert_called_with(self.locator, True, True)
         self.assertFalse(self.element._current_browser().execute_script.called)
 

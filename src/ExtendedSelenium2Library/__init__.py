@@ -103,10 +103,11 @@ class ExtendedSelenium2Library(Selenium2Library, ExtendedElementKeywords,
                        'b.type=\'text/javascript\';b.src=document.location.' \
                        'protocol+\'%(jquery_url)s\';a.appendChild(b);'
     NG_WRAPPER = '%(prefix)s' \
-                 'var inj;try{inj=angular.element(document.querySelector(' \
-                 '\'[data-ng-app],[ng-app],.ng-scope\')||document).injector()}' \
-                 'catch(ex){inj=angular.injector([\'ng\'])};inj.get=inj.get||inj;' \
-                 'inj.get(\'$browser\').notifyWhenNoOutstandingRequests(%(handler)s)' \
+                 'var $inj;try{$inj=angular.element(document.querySelector(' \
+                 '\'[data-ng-app],[ng-app],.ng-scope\')||document).injector()||' \
+                 'angular.injector([\'ng\'])}catch(ex){' \
+                 '$inj=angular.injector([\'ng\'])};$inj.get=$inj.get||$inj;' \
+                 '$inj.get(\'$browser\').notifyWhenNoOutstandingRequests(%(handler)s)' \
                  '%(suffix)s'
     PAGE_READY_WRAPPER = 'var cb=arguments[arguments.length-1];if(window.jQuery){' \
                          '$(document).ready(function(){cb(true)})}else{'\

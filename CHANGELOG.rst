@@ -1,3 +1,9 @@
+0.8.3 (2016.03.18)
+==================
+
+* Bugfixes on issue #8
+* Fix unit test to support Python 3.x
+
 0.8.2 (2016.03.06)
 ==================
 
