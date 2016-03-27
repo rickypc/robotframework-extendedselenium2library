@@ -23,10 +23,10 @@ Extended Selenium2 Library - a web testing library with AngularJS support.
 
 from sys import path
 path.append('src')
+import unittest
+import mock
 from ExtendedSelenium2Library.keywords import ExtendedJavascriptKeywords
 from Selenium2Library.keywords import _JavaScriptKeywords
-import mock
-import unittest
 
 
 class ExtendedJavascriptTests(unittest.TestCase):
@@ -38,6 +38,7 @@ class ExtendedJavascriptTests(unittest.TestCase):
         self.js_code_py = 'return True'
         self.js_code_vars = 'return ${true}'
         self.script = ExtendedJavascriptKeywords()
+        # pylint: disable=protected-access
         self.script._current_browser = mock.Mock()
         self.script._debug = mock.Mock()
         self.script._warn = mock.Mock()
@@ -48,6 +49,7 @@ class ExtendedJavascriptTests(unittest.TestCase):
 
     def test_execute_async_js_with_replaced_vars(self):
         """Should execute async js with replaced vars."""
+        # pylint: disable=protected-access
         self.script._get_javascript_to_execute = mock.Mock()
         self.script._get_javascript_to_execute.return_value = self.js_code_vars
         self.script._replace_variables_in_javascript_code = mock.Mock()
@@ -64,6 +66,7 @@ class ExtendedJavascriptTests(unittest.TestCase):
 
     def test_execute_js_with_replaced_vars(self):
         """Should execute js with replaced vars."""
+        # pylint: disable=protected-access
         self.script._get_javascript_to_execute = mock.Mock()
         self.script._get_javascript_to_execute.return_value = self.js_code_vars
         self.script._replace_variables_in_javascript_code = mock.Mock()
@@ -79,6 +82,7 @@ class ExtendedJavascriptTests(unittest.TestCase):
 
     def test_get_screen_size(self):
         """Should return the screen size."""
+        # pylint: disable=protected-access
         self.script._current_browser().execute_script = mock.Mock()
         self.script._current_browser().execute_script.return_value = [0, 0]
         self.assertEqual(self.script.get_screen_size(), [0, 0])
@@ -92,6 +96,7 @@ class ExtendedJavascriptTests(unittest.TestCase):
         self.script.get_browser_logs.return_value = logs
         self.script.warn_any_javascript_errors()
         self.script.get_browser_logs.assert_called_with()
+        # pylint: disable=protected-access
         self.script._warn.assert_called_with(' %s' % logs)
 
     def test_warn_any_js_errors_with_excludes(self):
@@ -102,6 +107,7 @@ class ExtendedJavascriptTests(unittest.TestCase):
         self.script.get_browser_logs.return_value = logs
         self.script.warn_any_javascript_errors(['miny'])
         self.script.get_browser_logs.assert_called_with()
+        # pylint: disable=protected-access
         self.script._warn.assert_called_with(' %s' % filtered_logs)
 
     def test_warn_any_js_errors_with_label(self):
@@ -112,10 +118,12 @@ class ExtendedJavascriptTests(unittest.TestCase):
         self.script.get_browser_logs.return_value = logs
         self.script.warn_any_javascript_errors(label=label)
         self.script.get_browser_logs.assert_called_with()
+        # pylint: disable=protected-access
         self.script._warn.assert_called_with('%s %s' % (label, logs))
 
     def test_replace_variables_in_js_code(self):
         """Should replace all variables in js code."""
+        # pylint: disable=protected-access
         self.script._builtin = mock.Mock()
         self.script._builtin.replace_variables = mock.Mock()
         self.script._builtin.replace_variables.return_value = self.js_code_py

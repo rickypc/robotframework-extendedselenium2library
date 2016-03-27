@@ -1,3 +1,11 @@
+0.9.0 (2016.03.26)
+==================
+
+* Bugfixes on issue #9 and issue #11
+* Refactors form and select elements into its own module
+* Fix and add more unit tests
+* Add acceptance tests for fixed issues
+
 0.8.3 (2016.03.18)
 ==================
 

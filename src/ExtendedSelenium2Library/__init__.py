@@ -25,7 +25,9 @@ from robot.libraries.BuiltIn import BuiltIn
 from Selenium2Library import Selenium2Library
 from ExtendedSelenium2Library.decorators import inherit_docs
 from ExtendedSelenium2Library.keywords import ExtendedElementKeywords
+from ExtendedSelenium2Library.keywords import ExtendedFormElementKeywords
 from ExtendedSelenium2Library.keywords import ExtendedJavascriptKeywords
+from ExtendedSelenium2Library.keywords import ExtendedSelectElementKeywords
 from ExtendedSelenium2Library.keywords import ExtendedWaitingKeywords
 from ExtendedSelenium2Library.version import get_version
 
@@ -35,7 +37,8 @@ __version__ = get_version()
 # pylint: disable=too-many-ancestors
 @inherit_docs
 class ExtendedSelenium2Library(Selenium2Library, ExtendedElementKeywords,
-                               ExtendedJavascriptKeywords, ExtendedWaitingKeywords):
+                               ExtendedFormElementKeywords, ExtendedJavascriptKeywords,
+                               ExtendedSelectElementKeywords, ExtendedWaitingKeywords):
     # pylint: disable=line-too-long
     """ExtendedSelenium2Library is a [http://goo.gl/boVQia|Selenium2 (WebDriver)]
     web testing library with [https://goo.gl/Kzz8Y3|AngularJS] support and
@@ -168,23 +171,17 @@ class ExtendedSelenium2Library(Selenium2Library, ExtendedElementKeywords,
         self._builtin = BuiltIn()
         Selenium2Library.__init__(self, implicit_wait=implicit_wait, **kwargs)
         ExtendedElementKeywords.__init__(self)
+        ExtendedFormElementKeywords.__init__(self)
         ExtendedJavascriptKeywords.__init__(self)
+        ExtendedSelectElementKeywords.__init__(self)
         ExtendedWaitingKeywords.__init__(self)
         self._implicit_wait_in_secs = float(implicit_wait) if implicit_wait is not None else 15.0
         self._page_ready_keyword_list = []
         # pylint: disable=protected-access
         self._table_element_finder._element_finder = self._element_finder
 
-    # pylint: disable=arguments-differ
-    # pylint: disable=missing-docstring
-    def click_button(self, locator, skip_ready=False):
-        element = self._scroll_into_view_on_internet_explorer(locator)
-        super(ExtendedSelenium2Library, self).click_button(element)
-        if not skip_ready:
-            self._wait_until_page_ready()
-
     def get_browser_logs(self):
-        """Returns the Javascript console logs from the browser.
+        """Returns the Javascript console logs from the browser. (Non Internet Explorer only).
 
         Please see [https://goo.gl/S7yvqR|Logging Preferences JSON object] to set
         how verbose the logging should be. (Default 'SEVERE')
@@ -192,7 +189,8 @@ class ExtendedSelenium2Library(Selenium2Library, ExtendedElementKeywords,
         Examples:
         | Get Browser Logs |
         """
-        return self._current_browser().get_log('browser')
+        # IEDriverServer doesn't have log implementation yet
+        return [] if self._is_internet_explorer() else self._current_browser().get_log('browser')
 
     def get_location(self):
         # AngularJS support
@@ -207,6 +205,7 @@ class ExtendedSelenium2Library(Selenium2Library, ExtendedElementKeywords,
             response = self._current_browser().get_current_url()
         return response
 
+    # pylint: disable=arguments-differ
     # pylint: disable=too-many-arguments
     def open_browser(self, url, browser='firefox', alias=None, remote_url=False,
                      desired_capabilities=None, ff_profile_dir=None, skip_ready=False):
@@ -237,82 +236,3 @@ class ExtendedSelenium2Library(Selenium2Library, ExtendedElementKeywords,
         | Remove Page Ready Keyword | My Keyword |
         """
         self._page_ready_keyword_list.remove(keyword_name)
-
-    def select_all_from_list(self, locator):
-        element = self._element_find(locator, True, True, 'select')
-        super(ExtendedSelenium2Library, self).select_all_from_list(element)
-        self._element_trigger_change(locator)
-
-    def select_checkbox(self, locator):
-        self._info("Selecting checkbox '%s'." % locator)
-        element = self._get_checkbox(locator)
-        if not element.is_selected():
-            self._select_checkbox_or_radio_button(locator)
-
-    def select_from_list(self, locator, *items):
-        element = self._element_find(locator, True, True, 'select')
-        super(ExtendedSelenium2Library, self).select_from_list(element, *items)
-        self._element_trigger_change(locator)
-
-    def select_from_list_by_index(self, locator, *indexes):
-        element = self._element_find(locator, True, True, 'select')
-        super(ExtendedSelenium2Library, self).select_from_list_by_index(element, *indexes)
-        self._element_trigger_change(locator)
-
-    def select_from_list_by_label(self, locator, *labels):
-        element = self._element_find(locator, True, True, 'select')
-        super(ExtendedSelenium2Library, self).select_from_list_by_label(element, *labels)
-        self._element_trigger_change(locator)
-
-    def select_from_list_by_value(self, locator, *values):
-        element = self._element_find(locator, True, True, 'select')
-        super(ExtendedSelenium2Library, self).select_from_list_by_value(element, *values)
-        self._element_trigger_change(locator)
-
-    def select_radio_button(self, group_name, value):
-        self._info("Selecting '%s' from radio button '%s'." % (value, group_name))
-        element = self._get_radio_button_with_value(group_name, value)
-        if not element.is_selected():
-            self._select_checkbox_or_radio_button('css=input[name="%s"][value="%s"]' %
-                                                  (group_name, value))
-
-    def submit_form(self, locator=None, skip_ready=False):
-        element = self._scroll_into_view_on_internet_explorer(locator)
-        super(ExtendedSelenium2Library, self).submit_form(element)
-        if not skip_ready:
-            self._wait_until_page_ready()
-
-    def _element_trigger_change(self, locator):
-        """Trigger change event on target element when AngularJS is ready."""
-        self._wait_until_page_ready(locator,
-                                    skip_stale_check=True,
-                                    prefix='var cb=arguments[arguments.length-1];'
-                                           'var el=arguments[0];if(window.angular){',
-                                    handler='function(){$(el).trigger(\'change\').'
-                                            'trigger(\'focusout\');cb(true)}')
-
-    def _input_text_into_text_field(self, locator, text, skip_ready=False):
-        """Send keys to text field with AngularJS synchronization."""
-        element = self._element_find(locator, True, True)
-        if element is None:
-            raise AssertionError("Element '%s' not found." % locator)
-        element.clear()
-        element.send_keys(text)
-        if not skip_ready:
-            self._wait_until_page_ready(locator,
-                                        skip_stale_check=True,
-                                        prefix='var cb=arguments[arguments.length-1];'
-                                               'var el=arguments[0];if(window.angular){',
-                                        handler='function(){$(el).trigger(\'change\').'
-                                                'trigger(\'focusout\');cb(true)}')
-
-    def _select_checkbox_or_radio_button(self, locator):
-        """Select checkbox or radio button with AngularJS support."""
-        self._wait_until_page_ready(locator,
-                                    skip_stale_check=True,
-                                    prefix='var cb=arguments[arguments.length-1];'
-                                           'var el=arguments[0];if(window.angular){',
-                                    handler='function(){angular.element(el).'
-                                            'prop(\'checked\',true).triggerHandler(\'click\');'
-                                            'cb(true)}',
-                                    suffix='}else{el.click();cb(false)}')

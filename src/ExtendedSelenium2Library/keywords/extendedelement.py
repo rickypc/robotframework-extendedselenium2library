@@ -21,19 +21,23 @@
 Extended Selenium2 Library - a web testing library with AngularJS support.
 """
 
+from robot.api import logger
+from selenium.webdriver.common.action_chains import ActionChains
+from selenium.webdriver.remote.webelement import WebElement
 from Selenium2Library.keywords import _ElementKeywords
 from ExtendedSelenium2Library.locators import ExtendedElementFinder
 
 
 class ExtendedElementKeywords(_ElementKeywords):
-    """ExtendedElementKeywords are web element related execution in the requested browser."""
+    """ExtendedElementKeywords are web element execution in the requested browser."""
+
     def __init__(self):
         super(ExtendedElementKeywords, self).__init__()
         self._element_finder = ExtendedElementFinder()
 
     # pylint: disable=arguments-differ
     def click_element(self, locator, skip_ready=False):
-        """Click element identified by ``locator``.
+        """Clicks an element identified by ``locator``.
 
         Arguments:
         - ``locator``: The locator to find requested element. Key attributes for
@@ -45,14 +49,15 @@ class ExtendedElementKeywords(_ElementKeywords):
         | Click Element | css=div.class |
         | Click Element | css=div.class | True |
         """
-        element = self._scroll_into_view_on_internet_explorer(locator)
-        super(ExtendedElementKeywords, self).click_element(element)
+        # pylint: disable=no-member
+        self._info("Clicking element '%s'." % locator)
+        self._get_element_and_scroll_into_view_on_iexplore(locator).click()
         if not skip_ready:
             # pylint: disable=no-member
             self._wait_until_page_ready()
 
     def click_element_at_coordinates(self, locator, xoffset, yoffset, skip_ready=False):
-        """Click element identified by ``locator`` at x/y coordinates of the element.
+        """Clicks an element identified by ``locator`` at x/y coordinates of the element.
         Cursor is moved at the center of the element and x/y coordinates are
         calculated from that point.
 
@@ -68,15 +73,19 @@ class ExtendedElementKeywords(_ElementKeywords):
         | Click Element At Coordinates | css=div.class | 0 | 0 |
         | Click Element At Coordinates | css=div.class | 0 | 0 | True |
         """
-        element = self._scroll_into_view_on_internet_explorer(locator)
-        super(ExtendedElementKeywords, self). \
-            click_element_at_coordinates(element, xoffset, yoffset)
+        # pylint: disable=no-member
+        self._info("Clicking element '%s' in coordinates '%s', '%s'." %
+                   (locator, xoffset, yoffset))
+        element = self._get_element_and_scroll_into_view_on_iexplore(locator)
+        # pylint: disable=no-member
+        ActionChains(self._current_browser()).move_to_element(element). \
+            move_by_offset(xoffset, yoffset).click().perform()
         if not skip_ready:
             # pylint: disable=no-member
             self._wait_until_page_ready()
 
     def click_image(self, locator, skip_ready=False):
-        """Click an image identified by ``locator``.
+        """Clicks an image identified by ``locator``.
 
         Arguments:
         - ``locator``: The locator to find requested image. Key attributes for
@@ -85,17 +94,22 @@ class ExtendedElementKeywords(_ElementKeywords):
         - ``skip_ready``: A boolean flag to skip the wait for page ready. (Default False)
 
         Examples:
-        | Click Image | css=div.class |
-        | Click Image | css=div.class | True |
+        | Click Image | css=img.class |
+        | Click Image | css=img.class | True |
         """
-        element = self._scroll_into_view_on_internet_explorer(locator)
-        super(ExtendedElementKeywords, self).click_image(element)
+        # pylint: disable=no-member
+        self._info("Clicking image '%s'." % locator)
+        element = self._get_element_and_scroll_into_view_on_iexplore(locator, False, 'image')
+        if element is None:
+            # A form may have an image as it's submit trigger.
+            element = self._get_element_and_scroll_into_view_on_iexplore(locator, True, 'input')
+        element.click()
         if not skip_ready:
             # pylint: disable=no-member
             self._wait_until_page_ready()
 
     def click_link(self, locator, skip_ready=False):
-        """Click a link identified by ``locator``.
+        """Clicks a link identified by ``locator``.
 
         Arguments:
         - ``locator``: The locator to find requested link. Key attributes for
@@ -104,17 +118,18 @@ class ExtendedElementKeywords(_ElementKeywords):
         - ``skip_ready``: A boolean flag to skip the wait for page ready. (Default False)
 
         Examples:
-        | Click Link | css=div.class |
-        | Click Link | css=div.class | True |
+        | Click Link | css=a.class |
+        | Click Link | css=a.class | True |
         """
-        element = self._scroll_into_view_on_internet_explorer(locator)
-        super(ExtendedElementKeywords, self).click_link(element)
+        # pylint: disable=no-member
+        self._info("Clicking link '%s'." % locator)
+        self._get_element_and_scroll_into_view_on_iexplore(locator, tag='a').click()
         if not skip_ready:
             # pylint: disable=no-member
             self._wait_until_page_ready()
 
     def double_click_element(self, locator, skip_ready=False):
-        """Double click element identified by ``locator``.
+        """Double clicks an element identified by ``locator``.
 
         Arguments:
         - ``locator``: The locator to find requested element. Key attributes for
@@ -126,8 +141,11 @@ class ExtendedElementKeywords(_ElementKeywords):
         | Double Click Element | css=div.class |
         | Double Click Element | css=div.class | True |
         """
-        element = self._scroll_into_view_on_internet_explorer(locator)
-        super(ExtendedElementKeywords, self).double_click_element(element)
+        # pylint: disable=no-member
+        self._info("Double clicking element '%s'." % locator)
+        element = self._get_element_and_scroll_into_view_on_iexplore(locator)
+        # pylint: disable=no-member
+        ActionChains(self._current_browser()).double_click(element).perform()
         if not skip_ready:
             # pylint: disable=no-member
             self._wait_until_page_ready()
@@ -187,7 +205,7 @@ class ExtendedElementKeywords(_ElementKeywords):
         return self._is_visible(locator)
 
     def scroll_element_into_view(self, locator):
-        """Scroll element from given ``locator`` into view.
+        """Scrolls an element from given ``locator`` into view.
 
         Arguments:
         - ``locator``: The locator to find requested element. Key attributes for
@@ -197,9 +215,11 @@ class ExtendedElementKeywords(_ElementKeywords):
         Examples:
         | Scroll Element Into View | css=div.class |
         """
-        element = self._element_find(locator, True, True)
-        if element is None:
-            raise AssertionError("Element '%s' not found." % locator)
+        if isinstance(locator, WebElement):
+            element = locator
+        else:
+            logger.info("Scrolling element '%s' into view." % locator)
+            element = self._element_find(locator, True, True)
         script = 'arguments[0].scrollIntoView()'
         # pylint: disable=no-member
         self._current_browser().execute_script(script, element)
@@ -210,15 +230,16 @@ class ExtendedElementKeywords(_ElementKeywords):
         # pylint: disable=no-member
         return self._current_browser().capabilities['browserName'].strip().lower()
 
+    def _get_element_and_scroll_into_view_on_iexplore(self, locator, required=True, tag=None):
+        """Scrolls a target element into view. (Internet Explorer only)."""
+        element = self._element_find(locator, True, required, tag)
+        if element and self._is_internet_explorer():
+            self.scroll_element_into_view(element)
+        return element
+
     def _is_internet_explorer(self, browser_name=None):
         """Returns true if current browser is Internet Explorer."""
         if not browser_name:
             browser_name = self._get_browser_name()
+        browser_name = browser_name.replace(' ', '')
         return browser_name == 'internetexplorer' or browser_name == 'ie'
-
-    def _scroll_into_view_on_internet_explorer(self, locator):
-        """Scroll target element into view. (Internet Explorer only)."""
-        element = self._element_find(locator, True, True)
-        if self._is_internet_explorer():
-            self.scroll_element_into_view(element)
-        return element
