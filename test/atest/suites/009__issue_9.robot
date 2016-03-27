@@ -1,6 +1,3 @@
-#!/usr/bin/env python
-# -*- coding: utf-8 -*-
-
 #    Extended Selenium2 Library - a web testing library with AngularJS support.
 #    Copyright (c) 2015, 2016 Richard Huang <rickypc@users.noreply.github.com>
 #
@@ -17,13 +14,12 @@
 #    You should have received a copy of the GNU Affero General Public License
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-"""
-Extended Selenium2 Library - a web testing library with AngularJS support.
-"""
+*** Settings ***
+Library        ${CURDIR}/../../../src/ExtendedSelenium2Library
+Test Teardown  Close Browser
 
-VERSION = '0.9.0'
-
-
-def get_version():
-    """Returns the current version."""
-    return VERSION
+*** Test Cases ***
+Test ES2L Click Element
+    [Documentation]  Should log locator during click element
+    [Setup]  Open Browser  file://${CURDIR}/../html/issue_9.html  firefox
+    Click Element  link=Get Teapot
