@@ -19,6 +19,15 @@ most modern browsers and can be used with both Python and Jython interpreters.
 
 More information about this library can be found in the `Keyword Documentation`_.
 
+Robot Framework and Cucumber Similarities
+-----------------------------------------
+
+|Similarity|
+
+|Onion|
+
+|Actual|
+
 Installation
 ------------
 
@@ -211,3 +220,9 @@ Documentation and other similar content are provided under `Creative Commons Att
 .. |License| image:: https://img.shields.io/pypi/l/robotframework-extendedselenium2library.svg
     :target: http://goo.gl/LOMJeU
     :alt: License
+.. |Similarity| image:: https://raw.githubusercontent.com/rickypc/robotframework-extendedselenium2library/master/assets/RF-Cucumber-01.jpg
+    :alt: Framework Similarities
+.. |Onion| image:: https://raw.githubusercontent.com/rickypc/robotframework-extendedselenium2library/master/assets/RF-Cucumber-02.jpg
+    :alt: Onion Diagram
+.. |Actual| image:: https://raw.githubusercontent.com/rickypc/robotframework-extendedselenium2library/master/assets/RF-Cucumber-03.jpg
+    :alt: Actual Implementation

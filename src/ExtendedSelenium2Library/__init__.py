@@ -62,6 +62,7 @@ class ExtendedSelenium2Library(Selenium2Library, ExtendedElementKeywords,
     | `Element Attribute Should Not Contain`             |
     | `Execute Async Javascript With Replaced Variables` |
     | `Execute Javascript With Replaced Variables`       |
+    | `Fast Wait Until Page Contains`                    |
     | `Get Browser Logs`                                 |
     | `Get Screen Size`                                  |
     | `Is Element Visible`                               |
