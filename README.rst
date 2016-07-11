@@ -220,9 +220,9 @@ Documentation and other similar content are provided under `Creative Commons Att
 .. |License| image:: https://img.shields.io/pypi/l/robotframework-extendedselenium2library.svg
     :target: http://goo.gl/LOMJeU
     :alt: License
-.. |Similarity| image:: /assets/RF-Cucumber-01.jpg
+.. |Similarity| image:: https://raw.githubusercontent.com/rickypc/robotframework-extendedselenium2library/master/assets/RF-Cucumber-01.jpg
     :alt: Framework Similarities
-.. |Onion| image:: /assets/RF-Cucumber-02.jpg
+.. |Onion| image:: https://raw.githubusercontent.com/rickypc/robotframework-extendedselenium2library/master/assets/RF-Cucumber-02.jpg
     :alt: Onion Diagram
-.. |Actual| image:: /assets/RF-Cucumber-03.jpg
+.. |Actual| image:: https://raw.githubusercontent.com/rickypc/robotframework-extendedselenium2library/master/assets/RF-Cucumber-03.jpg
     :alt: Actual Implementation

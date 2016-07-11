@@ -1,3 +1,12 @@
+0.9.1 (2016.07.10)
+==================
+
+- Add `Fast Wait Until Page Contains` keyword
+- Add unit tests for extended element finder
+- Add auto generated documentation
+- Add items to gitignore file
+- Adjust image path in the README file
+
 0.9.0 (2016.03.26)
 ==================
 

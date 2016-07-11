@@ -38,6 +38,44 @@ class ExtendedWaitingKeywords(_WaitingKeywords):
     def __init__(self):
         super(ExtendedWaitingKeywords, self).__init__()
 
+    def fast_wait_until_page_contains(self, text, excludes=None, timeout=None, error=None):
+        """Waits until ``text`` appears on current page.
+
+        Fails if any item in the ``excludes`` list appears in the current page.
+
+        Fails if ``timeout`` expires before the ``text`` appears.
+        See introduction for more information about timeout and its default value.
+
+        Arguments:
+        - ``text``: The expected value.
+        - ``excludes``: An exclusion list to be use to speed up the wait. (Default None)
+        - ``timeout``: The maximum value to wait for ``text`` to appears.
+                       See `introduction` for more information about ``timeout`` and
+                       its default value.
+        - ``error``: The value that would be use to override the default error message.
+
+        See also `Wait Until Page Contains Element`, `Wait For Condition`,
+        `Wait Until Element Is Visible` and BuiltIn keyword `Wait Until Keyword Succeeds`.
+
+        Examples:
+        | Fast Wait Until Page Contains | text         |
+        | @{excludes} =                 | Create List  | a | b | c   |
+        | Fast Wait Until Page Contains | text         | ${excludes} |
+        """
+        # pylint: disable=no-member
+        timeout = self._get_timeout_value(timeout, self._timeout_in_secs)
+        if not error:
+            error = "Text '%s' did not appear in %s" %\
+                    (text, self._format_timeout(timeout))
+        excludes = excludes if excludes is not None else ()
+        # pylint: disable=protected-access
+        excluded = next((exclude for exclude in excludes
+                         if self._is_text_present(exclude)), False)
+        if excluded:
+            raise AssertionError("Exclude text '%s' appears on the page." % excluded)
+        WebDriverWait(self, timeout, self._inputs['poll_frequency']).\
+            until(lambda driver: driver._is_text_present(text), error)
+
     def wait_for_async_condition(self, condition, timeout=None, error=None):
         """Waits until the given asynchronous ``condition`` is true or ``timeout`` expires.
 
@@ -154,13 +192,13 @@ class ExtendedWaitingKeywords(_WaitingKeywords):
         # pylint: disable=no-member
         browser = self._current_browser()
         browser.set_script_timeout(timeout)
+        # pylint: disable=bare-except
         try:
             WebDriverWait(browser, timeout, self._inputs['poll_frequency']).\
                 until(lambda driver: driver.execute_async_script(script), error)
         except TimeoutException:
             # prevent double wait
             pass
-        # pylint: disable=bare-except
         except:
             self._debug(exc_info()[0])
             # still inflight, second chance. let the browser take a deep breath...
@@ -168,7 +206,6 @@ class ExtendedWaitingKeywords(_WaitingKeywords):
             try:
                 WebDriverWait(browser, timeout, self._inputs['poll_frequency']).\
                     until(lambda driver: driver.execute_async_script(script), error)
-            # pylint: disable=bare-except
             except:
                 # instead of halting the process because AngularJS is not ready
                 # in <TIMEOUT>, we try our luck...

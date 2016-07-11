@@ -21,7 +21,7 @@
 Extended Selenium2 Library - a web testing library with AngularJS support.
 """
 
-VERSION = '0.9.0'
+VERSION = '0.9.1'
 
 
 def get_version():
