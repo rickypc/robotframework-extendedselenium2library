@@ -206,16 +206,16 @@ Documentation and other similar content are provided under `Creative Commons Att
     :target: https://goo.gl/9z5Xj9
     :alt: Keyword Documentation
 .. |Version| image:: https://img.shields.io/pypi/v/robotframework-extendedselenium2library.svg
-    :target: https://goo.gl/wHr4ni
+    :target: https://goo.gl/ZZMdxD
     :alt: Package Version
 .. |Status| image:: https://img.shields.io/pypi/status/robotframework-extendedselenium2library.svg
-    :target: https://goo.gl/wHr4ni
+    :target: https://goo.gl/ZZMdxD
     :alt: Development Status
 .. |Python| image:: https://img.shields.io/pypi/pyversions/robotframework-extendedselenium2library.svg
     :target: https://goo.gl/sXzgao
     :alt: Python Version
 .. |Download| image:: https://img.shields.io/pypi/dm/robotframework-extendedselenium2library.svg
-    :target: https://goo.gl/wHr4ni
+    :target: https://goo.gl/ZZMdxD
     :alt: Monthly Download
 .. |License| image:: https://img.shields.io/pypi/l/robotframework-extendedselenium2library.svg
     :target: http://goo.gl/LOMJeU
