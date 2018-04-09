@@ -85,10 +85,10 @@ and its dependencies yourself.
 
 - Download source distributions (``*.tar.gz``) for the library and its dependencies:
 
-  - https://pypi.python.org/pypi/robotframework-extendedselenium2library
-  - https://pypi.python.org/pypi/robotframework-selenium2library
-  - https://pypi.python.org/pypi/selenium
-  - https://pypi.python.org/pypi/decorator
+  - https://pypi.org/project/robotframework-extendedselenium2library
+  - https://pypi.org/project/robotframework-selenium2library
+  - https://pypi.org/project/selenium
+  - https://pypi.org/project/decorator
 
 - Download PGP signatures (``*.tar.gz.asc``) for signed packages.
 
@@ -182,7 +182,7 @@ That's it! Thank you for your contribution!
 License
 -------
 
-Copyright (c) 2015, 2016 Richard Huang.
+Copyright (c) 2015, 2016, 2018 Richard Huang.
 
 This library is free software, licensed under: `GNU Affero General Public License (AGPL-3.0)`_.
 

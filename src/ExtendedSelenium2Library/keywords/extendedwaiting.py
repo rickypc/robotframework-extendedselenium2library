@@ -200,7 +200,7 @@ class ExtendedWaitingKeywords(_WaitingKeywords):
             # prevent double wait
             pass
         # pylint: disable=bare-except
-        except:
+        except:  # noqa: E722
             self._debug(exc_info()[0])
             # still inflight, second chance. let the browser take a deep breath...
             sleep(self._inputs['browser_breath_delay'])
@@ -208,7 +208,7 @@ class ExtendedWaitingKeywords(_WaitingKeywords):
                 WebDriverWait(browser, timeout, self._inputs['poll_frequency']).\
                     until(lambda driver: driver.execute_async_script(script), error)
             # pylint: disable=bare-except
-            except:
+            except:  # noqa: E722
                 # instead of halting the process because AngularJS is not ready
                 # in <TIMEOUT>, we try our luck...
                 self._debug(exc_info()[0])
@@ -380,7 +380,7 @@ class ExtendedWaitingKeywords(_WaitingKeywords):
             WebDriverWait(None, timeout, self._inputs['poll_frequency']).\
                 until_not(staleness_of(browser.find_element_by_tag_name('html')), '')
         # pylint: disable=bare-except
-        except:
+        except:  # noqa: E722
             # instead of halting the process because document is not ready
             # in <TIMEOUT>, we try our luck...
             # pylint: disable=no-member

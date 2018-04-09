@@ -62,11 +62,9 @@ github_doc:clean
 	git checkout master
 
 testpypi:clean_dist doc
-	python setup.py register -r test
-	python setup.py sdist upload -r test --sign
-	@echo https://testpypi.python.org/pypi/robotframework-$(call lc,$(LIBRARY_NAME))/
+	python setup.py sdist --formats=gztar upload -r test --sign
+	@echo https://test.pypi.org/project/robotframework-$(call lc,$(LIBRARY_NAME))/
 
 pypi:clean_dist doc
-	python setup.py register -r pypi
-	python setup.py sdist upload -r pypi --sign
-	@echo https://pypi.python.org/pypi/robotframework-$(call lc,$(LIBRARY_NAME))/
+	python setup.py sdist --formats=gztar upload -r pypi --sign
+	@echo https://pypi.org/project/robotframework-$(call lc,$(LIBRARY_NAME))/
