@@ -58,5 +58,5 @@ setup(
     platforms='any',
     packages=find_packages('src'),
     package_dir={'': 'src'},
-    install_requires=['selenium >= 2.46.1', 'robotframework-selenium2library >= 1.7.2']
+    install_requires=['selenium >= 2.46.1', 'robotframework-selenium2library == 1.8.0']
 )
